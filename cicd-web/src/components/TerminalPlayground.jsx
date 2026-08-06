@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, Settings } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 const colors = {
   green: (text) => <span style={{ color: 'var(--color-green)' }}>{text}</span>,
@@ -12,143 +12,108 @@ const colors = {
 
 const terminalOutputs = {
   init: [
-    { text: "$ cicd init", delay: 100 },
-    { text: "Initializing cicd configuration in current directory...", delay: 400 },
-    { text: colors.green("✔ Created config file at: /Users/username/project/.cicd-config.json"), delay: 700 },
-    { text: "", delay: 850 },
-    { text: colors.bold("[Config Details]"), delay: 900 },
-    { text: "  projectName:        my-awesome-app", delay: 1000 },
-    { text: "  version:            1.0.0", delay: 1100 },
-    { text: "  customBuildCommand: null", delay: 1200 },
-    { text: "  customTestCommand:  null", delay: 1300 },
+    { text: "$ cicd init --help", delay: 50 },
+    { text: `${colors.yellow("Usage:")}        cicd init [OPTIONS]`, delay: 150 },
+    { text: `${colors.yellow("Description:")}  Initializes the CLI config template.`, delay: 250 },
+    { text: `${colors.yellow("Options:")}      -d, --dir=<targetDir> : Config folder location`, delay: 350 },
+    { text: "", delay: 450 },
+    { text: "Initializing cicd configuration in current directory...", delay: 650 },
+    { text: colors.green("✔ Created config file at: /Users/username/project/.cicd-config.json"), delay: 950 },
+    { text: "", delay: 1100 },
+    { text: colors.bold("[Config Details]"), delay: 1200 },
+    { text: "  projectName:        my-awesome-app", delay: 1300 },
+    { text: "  version:            1.0.0", delay: 1400 },
+    { text: "  customBuildCommand: null", delay: 1500 },
+    { text: "  customTestCommand:  null", delay: 1600 },
   ],
   detect: [
-    { text: "$ cicd detect", delay: 100 },
-    { text: "Scanning project files...", delay: 300 },
-    { text: "Resolving build descriptors and source patterns...", delay: 600 },
-    { text: "", delay: 750 },
-    { text: `${colors.cyan("Framework:")}          React`, delay: 850 },
-    { text: `${colors.cyan("Language:")}           JavaScript`, delay: 950 },
-    { text: `${colors.cyan("Build Tool:")}         npm`, delay: 1050 },
-    { text: `${colors.cyan("Testing:")}            Jest`, delay: 1150 },
-    { text: `${colors.cyan("Docker:")}             ${colors.green("Found (Dockerfile)")}`, delay: 1250 },
-    { text: `${colors.cyan("Kubernetes:")}         ${colors.yellow("Not Found")}`, delay: 1350 },
-    { text: `${colors.cyan("Deployment Target:")}  Docker Container`, delay: 1450 },
-    { text: `${colors.cyan("CI Platform:")}        GitHub Actions (recommended)`, delay: 1550 },
-    { text: "", delay: 1650 },
-    { text: colors.green("Done."), delay: 1750 },
+    { text: "$ cicd detect --help", delay: 50 },
+    { text: `${colors.yellow("Usage:")}        cicd detect [OPTIONS]`, delay: 150 },
+    { text: `${colors.yellow("Description:")}  Scans codebase to resolve stack blueprints.`, delay: 250 },
+    { text: `${colors.yellow("Options:")}      -d, --dir=<targetDir> : Path to execute scan`, delay: 350 },
+    { text: "", delay: 450 },
+    { text: "Scanning project files...", delay: 650 },
+    { text: "Resolving build descriptors and source patterns...", delay: 950 },
+    { text: "", delay: 1100 },
+    { text: `${colors.cyan("Framework:")}          React`, delay: 1200 },
+    { text: `${colors.cyan("Language:")}           JavaScript`, delay: 1300 },
+    { text: `${colors.cyan("Build Tool:")}         npm`, delay: 1400 },
+    { text: `${colors.cyan("Testing:")}            Jest`, delay: 1500 },
+    { text: `${colors.cyan("Docker:")}             ${colors.green("Found (Dockerfile)")}`, delay: 1600 },
+    { text: `${colors.cyan("Deployment Target:")}  Docker Container`, delay: 1700 },
+    { text: `${colors.cyan("CI Platform:")}        GitHub Actions`, delay: 1800 },
+    { text: "", delay: 1950 },
+    { text: colors.green("Done."), delay: 2050 },
   ],
   generate: [
-    { text: "$ cicd generate github -w", delay: 100 },
-    { text: "Analyzing codebase stack model...", delay: 300 },
-    { text: colors.green("✔ Resolved platform generator strategy: GitHubActions"), delay: 600 },
-    { text: colors.green("✔ Compiled resources/templates/github/actions-template.yml"), delay: 900 },
-    { text: colors.green("✔ Injected project properties & caching scopes"), delay: 1200 },
-    { text: "", delay: 1350 },
-    { text: colors.bold("Success: Pipeline generated and written to:"), delay: 1450 },
-    { text: colors.cyan("  .github/workflows/main.yml"), delay: 1550 },
+    { text: "$ cicd generate github -w --help", delay: 50 },
+    { text: `${colors.yellow("Usage:")}        cicd generate <platform> [OPTIONS]`, delay: 150 },
+    { text: `${colors.yellow("Description:")}  Compiles Mustache workflow templates.`, delay: 250 },
+    { text: `${colors.yellow("Options:")}      -w, --write : Save | -o, --output=<path> : Custom path`, delay: 350 },
+    { text: "", delay: 450 },
+    { text: "Analyzing codebase stack model...", delay: 650 },
+    { text: colors.green("✔ Resolved platform generator strategy: GitHubActions"), delay: 950 },
+    { text: colors.green("✔ Compiled resources/templates/github/actions-template.yml"), delay: 1250 },
+    { text: colors.green("✔ Injected project properties & caching scopes"), delay: 1550 },
+    { text: "", delay: 1700 },
+    { text: colors.bold("Success: Pipeline generated and written to:"), delay: 1800 },
+    { text: colors.cyan("  .github/workflows/main.yml"), delay: 1900 },
   ],
   validate: [
-    { text: "$ cicd validate -f .gitlab-ci.yml", delay: 100 },
-    { text: "Reading pipeline configuration...", delay: 300 },
-    { text: "Loaded Rule Engine (7 checks active)", delay: 600 },
-    { text: "Running topological graph analysis for job dependencies...", delay: 900 },
-    { text: "", delay: 1100 },
-    { text: colors.bold("Validation Report"), delay: 1200 },
-    { text: "", delay: 1250 },
-    { text: `${colors.yellow("WARNING")} - Cache path not configured. Adding dependency caching speeds up build durations.`, delay: 1400 },
-    { text: `${colors.green("INFO")}    - Docker build steps detected.`, delay: 1550 },
-    { text: "", delay: 1650 },
-    { text: colors.bold("Overall Status"), delay: 1750 },
-    { text: "  PASSED", delay: 1850 },
+    { text: "$ cicd validate --help", delay: 50 },
+    { text: `${colors.yellow("Usage:")}        cicd validate [OPTIONS]`, delay: 150 },
+    { text: `${colors.yellow("Description:")}  Audits yaml configurations for cyclical loops & leaks.`, delay: 250 },
+    { text: `${colors.yellow("Options:")}      -f, --file=<path> : Target file | -d : Root directory`, delay: 350 },
+    { text: "", delay: 450 },
+    { text: "Reading pipeline configuration...", delay: 650 },
+    { text: "Loaded Rule Engine (7 checks active)", delay: 950 },
+    { text: "Running topological graph analysis for job dependencies...", delay: 1250 },
+    { text: "", delay: 1400 },
+    { text: colors.bold("Validation Report"), delay: 1500 },
+    { text: `${colors.yellow("WARNING")} - Cache path not configured.`, delay: 1650 },
+    { text: `${colors.green("INFO")}    - Docker build steps detected.`, delay: 1750 },
+    { text: "", delay: 1850 },
+    { text: "Status: PASSED", delay: 1950 },
   ],
   explain: [
-    { text: "$ cicd explain", delay: 100 },
-    { text: "Parsing pipeline stages graph...", delay: 300 },
-    { text: "", delay: 500 },
-    { text: colors.bold("Pipeline Flow:"), delay: 600 },
-    { text: "  install-dependencies", delay: 750 },
-    { text: "    ↓", delay: 800 },
-    { text: "  test", delay: 900 },
-    { text: "    ↓", delay: 950 },
-    { text: "  docker-build-push", delay: 1050 },
-    { text: "    ↓", delay: 1100 },
-    { text: "  deploy-kubernetes", delay: 1200 },
-    { text: "", delay: 1300 },
-    { text: `${colors.cyan("Estimated Runtime:")} 6 min`, delay: 1400 },
-    { text: `${colors.cyan("Parallel Jobs:")}     1`, delay: 1500 },
+    { text: "$ cicd explain --help", delay: 50 },
+    { text: `${colors.yellow("Usage:")}        cicd explain [OPTIONS]`, delay: 150 },
+    { text: `${colors.yellow("Description:")}  Depicts execution paths and stages.`, delay: 250 },
+    { text: `${colors.yellow("Options:")}      -f, --file=<path> : Target workflow config path`, delay: 350 },
+    { text: "", delay: 450 },
+    { text: "Parsing pipeline stages graph...", delay: 650 },
+    { text: "", delay: 800 },
+    { text: colors.bold("Pipeline Flow:"), delay: 900 },
+    { text: "  install-dependencies -> test -> docker-build-push -> deploy-kubernetes", delay: 1100 },
+    { text: "", delay: 1250 },
+    { text: `${colors.cyan("Estimated Runtime:")} 6 min`, delay: 1350 },
+    { text: `${colors.cyan("Parallel Jobs:")}     1`, delay: 1450 },
   ],
   convert: [
-    { text: "$ cicd convert github gitlab -f .github/workflows/main.yml", delay: 100 },
-    { text: "Parsing GitHub Actions YAML workflow...", delay: 300 },
-    { text: "Extracting stage script commands...", delay: 600 },
-    { text: "Translating to GitLab CI variables and job format...", delay: 900 },
-    { text: "", delay: 1100 },
-    { text: colors.green("Success: Translated config printed to console."), delay: 1200 },
-    { text: "Use -o to write directly to .gitlab-ci.yml", delay: 1300 },
+    { text: "$ cicd convert --help", delay: 50 },
+    { text: `${colors.yellow("Usage:")}        cicd convert <source> <target> [OPTIONS]`, delay: 150 },
+    { text: `${colors.yellow("Description:")}  Translates pipeline yaml between platforms.`, delay: 250 },
+    { text: `${colors.yellow("Options:")}      -f, --file=<path> : Source yaml | -o : Export path`, delay: 350 },
+    { text: "", delay: 450 },
+    { text: "Parsing GitHub Actions YAML workflow...", delay: 650 },
+    { text: "Extracting stage script commands...", delay: 950 },
+    { text: "Translating to GitLab CI variables and job format...", delay: 1250 },
+    { text: "", delay: 1400 },
+    { text: colors.green("Success: Translated config printed to console."), delay: 1500 },
   ],
   doctor: [
-    { text: "$ cicd doctor", delay: 100 },
-    { text: "Checking system toolchains and dependencies...", delay: 350 },
-    { text: "", delay: 500 },
-    { text: "Git        git version 2.47.0              PASS", delay: 650 },
-    { text: "Docker     Docker version 28.3.2           PASS", delay: 800 },
-    { text: "Java       java 23.0.2                     PASS", delay: 950 },
-    { text: "Node       v24.5.0                         PASS", delay: 1100 },
-    { text: "kubectl    Client Version v1.35.1          PASS", delay: 1250 },
-    { text: "helm       v4.1.1                          PASS", delay: 1400 },
-    { text: "", delay: 1500 },
-    { text: colors.green("System Health: 100% (All critical tools available)"), delay: 1600 },
+    { text: "$ cicd doctor --help", delay: 50 },
+    { text: `${colors.yellow("Usage:")}        cicd doctor`, delay: 150 },
+    { text: `${colors.yellow("Description:")}  Audits local system toolchain health.`, delay: 250 },
+    { text: "", delay: 350 },
+    { text: "Checking system toolchains and dependencies...", delay: 550 },
+    { text: "Git        git version 2.47.0              PASS", delay: 750 },
+    { text: "Docker     Docker version 28.3.2           PASS", delay: 900 },
+    { text: "Java       java 23.0.2                     PASS", delay: 1050 },
+    { text: "Node       v24.5.0                         PASS", delay: 1200 },
+    { text: "", delay: 1350 },
+    { text: colors.green("System Health: 100% (All critical tools available)"), delay: 1450 },
   ]
-};
-
-const commandInfo = {
-  init: {
-    usage: 'cicd init [OPTIONS]',
-    description: 'Initializes the CLI in the current directory by creating a `.cicd-config.json` file. Allows customizing compilation triggers and overriding detector assumptions.',
-    options: ['-d, --dir=<targetDir> : Set configuration folder location']
-  },
-  detect: {
-    usage: 'cicd detect [OPTIONS]',
-    description: 'Scans the directory for configuration descriptors, package assets, and build configurations to construct the normalized stack blueprint.',
-    options: ['-d, --dir=<targetDir> : Directory path to execute scan']
-  },
-  generate: {
-    usage: 'cicd generate <platform> [OPTIONS]',
-    description: 'Compiles custom Mustache templates to generate optimized workflow pipelines. Supports creating custom Dockerfiles as well.',
-    options: [
-      '<platform>            : github, gitlab, jenkins, azure, docker',
-      '-w, --write           : Write output directly to standard directory',
-      '-o, --output=<path>   : Export pipeline to custom file path'
-    ]
-  },
-  validate: {
-    usage: 'cicd validate [OPTIONS]',
-    description: 'Audits pipeline structure using a multi-rule verification framework. Runs dependency graph sort to detect cyclic deadlocks and scans for plain credentials.',
-    options: [
-      '-f, --file=<filePath> : Custom pipeline configuration file path',
-      '-d, --dir=<baseDir>   : Root directory to analyze context'
-    ]
-  },
-  explain: {
-    usage: 'cicd explain [OPTIONS]',
-    description: 'Constructs the execution tree, highlighting parallel jobs, stage sequences, and estimated compilation build times.',
-    options: ['-f, --file=<filePath> : Path to the target pipeline configuration file']
-  },
-  convert: {
-    usage: 'cicd convert <source> <target> [OPTIONS]',
-    description: 'Translates pipeline syntax directly between different platform structures. Maps script blocks and cache mappings dynamically.',
-    options: [
-      '<source> <target>     : Options are github, gitlab, jenkins, azure',
-      '-f, --file=<filePath> : Path of source configuration to convert',
-      '-o, --output=<path>   : Write translated schema to custom location'
-    ]
-  },
-  doctor: {
-    usage: 'cicd doctor',
-    description: 'Checks and reports the health of the system toolchains. Evaluates Git, Docker, Java, Node, kubectl, and Helm versions.',
-    options: []
-  }
 };
 
 export default function TerminalPlayground() {
@@ -160,17 +125,14 @@ export default function TerminalPlayground() {
 
   // Trigger Apple MacBook intro sequence on mount
   useEffect(() => {
-    // Stage 1: Rotate / Revolving (closed laptop spins Y from 180 to 0)
     const revTimer = setTimeout(() => {
       setAnimPhase('revolving');
     }, 400);
 
-    // Stage 2: Opening screen lid (rotateX flips open from -90 to 0)
     const openTimer = setTimeout(() => {
       setAnimPhase('opening');
     }, 1600);
 
-    // Stage 3: Ready (Terminal starts typing commands)
     const readyTimer = setTimeout(() => {
       setAnimPhase('ready');
     }, 2800);
@@ -204,7 +166,6 @@ export default function TerminalPlayground() {
     setSelectedCommand(cmdId);
   };
 
-  // Determine transform overrides dynamically depending on current intro animation phase
   const getDeviceStyle = () => {
     if (animPhase === 'closed') {
       return { transform: 'rotateY(180deg) rotateX(12deg)' };
@@ -236,7 +197,7 @@ export default function TerminalPlayground() {
             <button
               key={cmd.id}
               onClick={() => handleCommandChange(cmd.id)}
-              disabled={animPhase !== 'ready'} // Disable buttons during the opening intro animation
+              disabled={animPhase !== 'ready'}
               className={`cmd-btn ${selectedCommand === cmd.id ? 'active' : ''}`}
               style={{ opacity: animPhase !== 'ready' ? 0.6 : 1 }}
             >
@@ -249,7 +210,7 @@ export default function TerminalPlayground() {
           ))}
         </div>
 
-        {/* 3D CSS MacBook Terminal Container (Column 2) - Larger size */}
+        {/* 3D CSS MacBook Terminal Container (Column 2) - Expanded to Max Width */}
         <div className="macbook-wrapper">
           <div className="macbook-device" style={getDeviceStyle()}>
             {/* Display screen lid */}
@@ -270,7 +231,7 @@ export default function TerminalPlayground() {
               {/* Inner Display (Terminal output screen) */}
               {isLidOpen && (
                 <div className="macbook-screen">
-                  <div className="terminal-window-body" style={{ height: '100%', border: 'none', background: 'transparent', padding: '10px' }}>
+                  <div className="terminal-window-body" style={{ height: '100%', border: 'none', background: 'transparent', padding: '12px' }}>
                     <AnimatePresence mode="popLayout">
                       {typedLines.map((line, idx) => (
                         <motion.div 
@@ -296,46 +257,6 @@ export default function TerminalPlayground() {
             <div className="macbook-base">
               <div className="macbook-notch" />
               <div className="macbook-trackpad" />
-            </div>
-          </div>
-        </div>
-
-        {/* Documentation / Info Column (Column 3) */}
-        <div className="terminal-info-card">
-          <div className="terminal-info-card-header">
-            <Settings size={18} style={{ color: 'var(--text-secondary)' }} />
-            <span style={{ fontWeight: 700, fontFamily: 'var(--font-mono)', fontSize: '12px' }}>manual reference</span>
-          </div>
-
-          <div className="terminal-info-card-body">
-            <div style={{ marginBottom: '16px' }}>
-              <span className="info-tag-header">USAGE</span>
-              <div className="info-code-block" style={{ color: '#f8fafc', fontFamily: 'var(--font-mono)' }}>{commandInfo[selectedCommand].usage}</div>
-            </div>
-
-            <div style={{ marginBottom: '16px' }}>
-              <span className="info-tag-header">DESCRIPTION</span>
-              <p className="info-text-paragraph">{commandInfo[selectedCommand].description}</p>
-            </div>
-
-            {commandInfo[selectedCommand].options.length > 0 && (
-              <div>
-                <span className="info-tag-header">OPTIONS</span>
-                <div className="info-options-list">
-                  {commandInfo[selectedCommand].options.map((opt, i) => (
-                    <div key={i} className="info-option-item">{opt}</div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Laptop developer illustration decoration */}
-            <div className="terminal-info-decorator">
-              <img 
-                src="/laptop_developer.png" 
-                alt="Developer looking at code schemas" 
-                className="decorator-image"
-              />
             </div>
           </div>
         </div>

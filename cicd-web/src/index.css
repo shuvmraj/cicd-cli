@@ -1109,18 +1109,13 @@ a:hover {
 .terminal-playground-layout {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 24px;
-  align-items: stretch;
+  gap: 32px;
+  align-items: center;
   width: 100%;
 }
-@media (min-width: 768px) {
+@media (min-width: 1024px) {
   .terminal-playground-layout {
-    grid-template-columns: 1.2fr 2fr;
-  }
-}
-@media (min-width: 1200px) {
-  .terminal-playground-layout {
-    grid-template-columns: 1fr 1.6fr 1.2fr;
+    grid-template-columns: 1fr 2.6fr;
   }
 }
 
@@ -1224,7 +1219,7 @@ a:hover {
 .macbook-device {
   position: relative;
   width: 100%;
-  max-width: 640px; /* Scale up device size */
+  max-width: 740px; /* Maximize device size */
   display: flex;
   flex-direction: column;
   align-items: center;
