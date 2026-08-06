@@ -1,0 +1,57 @@
+pipeline {
+    agent {
+        docker {
+            image '{{{DOCKER_IMAGE}}}'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
+
+    environment {
+        DOCKER_IMAGE_NAME = 'my-app'
+        REGISTRY = 'docker.io'
+        DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'
+        KUBE_CREDENTIALS_ID = 'kubeconfig-credentials'
+    }
+
+    stages {
+        stage('Install Dependencies') {
+            steps {
+                sh '{{{BUILD_COMMAND}}}'
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh '{{{TEST_COMMAND}}}'
+            }
+        }
+
+        {{#DOCKER_ENABLED}}
+        stage('Docker Build and Push') {
+            steps {
+                script {
+                    docker.withRegistry("https://${REGISTRY}", DOCKER_CREDENTIALS_ID) {
+                        def customImage = docker.build("${REGISTRY}/${DOCKER_IMAGE_NAME}:latest")
+                        customImage.push()
+                    }
+                }
+            }
+        }
+        {{/DOCKER_ENABLED}}
+
+        stage('Deploy') {
+            steps {
+                withCredentials([file(credentialsId: KUBE_CREDENTIALS_ID, variable: 'KUBECONFIG')]) {
+                    sh '{{{DEPLOY_COMMAND}}}'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: '{{{ARTIFACT_PATH}}}', onlyIfSuccessful: true, allowEmptyArchive: true
+            cleanWs()
+        }
+    }
+}

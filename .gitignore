@@ -1,0 +1,14 @@
+# Maven build outputs
+target/
+dependency-reduced-pom.xml
+
+# IDE settings
+.idea/
+*.iml
+.settings/
+.project
+.classpath
+
+# OS specific files
+.DS_Store
+Thumbs.db

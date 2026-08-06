@@ -1,0 +1,7 @@
+FROM php:8.2-fpm-alpine
+WORKDIR /var/www
+RUN apk add --no-cache composer
+COPY . .
+RUN composer install --no-dev --optimize-autoloader
+EXPOSE 9000
+CMD ["php-fpm"]

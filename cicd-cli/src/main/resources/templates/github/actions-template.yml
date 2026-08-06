@@ -1,0 +1,79 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+env:
+  DOCKER_IMAGE_NAME: my-app
+  REGISTRY: docker.io
+
+jobs:
+  install-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: {{{CACHE_PATH}}}
+          key: ${{{leftBrace}}} runner.os {{{rightBrace}}}-{{{CACHE_KEY}}}-${{{leftBrace}}} hashFiles('**/pom.xml', '**/package-lock.json', '**/requirements.txt', '**/composer.json') {{{rightBrace}}}
+          restore-keys: |
+            ${{{leftBrace}}} runner.os {{{rightBrace}}}-{{{CACHE_KEY}}}-
+
+      - name: Install dependencies
+        run: |
+          {{{BUILD_COMMAND}}}
+
+  test:
+    needs: install-dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run Tests
+        run: |
+          {{{TEST_COMMAND}}}
+
+  {{#DOCKER_ENABLED}}
+  docker-build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{{leftBrace}}} secrets.DOCKER_USERNAME {{{rightBrace}}}
+          password: ${{{leftBrace}}} secrets.DOCKER_PASSWORD {{{rightBrace}}}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{{leftBrace}}} env.REGISTRY {{{rightBrace}}}/${{{leftBrace}}} secrets.DOCKER_USERNAME {{{rightBrace}}}/${{{leftBrace}}} env.DOCKER_IMAGE_NAME {{{rightBrace}}}:latest
+  {{/DOCKER_ENABLED}}
+
+  deploy:
+    needs: {{#DOCKER_ENABLED}}docker-build{{/DOCKER_ENABLED}}{{^DOCKER_ENABLED}}test{{/DOCKER_ENABLED}}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run Deploy Command
+        env:
+          KUBECONFIG: ${{{leftBrace}}} secrets.KUBECONFIG {{{rightBrace}}}
+        run: |
+          {{{DEPLOY_COMMAND}}}

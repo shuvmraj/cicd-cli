@@ -1,0 +1,16 @@
+#!/bin/bash
+# Resolve the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+JAR_PATH="${SCRIPT_DIR}/cicd-cli/target/cicd-cli-1.0-SNAPSHOT.jar"
+
+if [ ! -f "$JAR_PATH" ]; then
+    JAR_PATH="${SCRIPT_DIR}/target/cicd-cli-1.0-SNAPSHOT.jar"
+fi
+
+if [ ! -f "$JAR_PATH" ]; then
+    echo "Error: Executable JAR not found at ${JAR_PATH}."
+    echo "Please build the project first by running: mvn clean package"
+    exit 1
+fi
+
+java -jar "$JAR_PATH" "$@"

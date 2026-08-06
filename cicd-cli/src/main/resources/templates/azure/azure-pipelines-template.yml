@@ -1,0 +1,65 @@
+trigger:
+  - main
+  - master
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  DOCKER_IMAGE_NAME: 'my-app'
+  REGISTRY: 'docker.io'
+
+stages:
+  - stage: InstallAndTest
+    displayName: 'Install Dependencies and Run Tests'
+    jobs:
+      - job: Test
+        steps:
+          - task: Cache@2
+            inputs:
+              key: '{{{CACHE_KEY}}} | "$(Agent.OS)"'
+              path: {{{CACHE_PATH}}}
+              cacheHitVar: CACHE_RESTORED
+
+          - script: |
+              {{{BUILD_COMMAND}}}
+            displayName: 'Install Dependencies'
+
+          - script: |
+              {{{TEST_COMMAND}}}
+            displayName: 'Run Suite'
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: '{{{ARTIFACT_PATH}}}'
+              ArtifactName: 'drop'
+              publishLocation: 'Container'
+
+  {{#DOCKER_ENABLED}}
+  - stage: BuildImage
+    displayName: 'Container Integration'
+    dependsOn: InstallAndTest
+    jobs:
+      - job: BuildAndPush
+        steps:
+          - task: Docker@2
+            inputs:
+              containerRegistry: 'DockerHubServiceConnection'
+              repository: '$(DOCKER_IMAGE_NAME)'
+              command: 'buildAndPush'
+              Dockerfile: '**/Dockerfile'
+              tags: |
+                latest
+  {{/DOCKER_ENABLED}}
+
+  - stage: Deploy
+    displayName: 'Continuous Delivery'
+    dependsOn: {{#DOCKER_ENABLED}}BuildImage{{/DOCKER_ENABLED}}{{^DOCKER_ENABLED}}InstallAndTest{{/DOCKER_ENABLED}}
+    jobs:
+      - job: DeployJob
+        steps:
+          - script: |
+              {{{DEPLOY_COMMAND}}}
+            displayName: 'Execute Deploy Script'
+            env:
+              KUBECONFIG: $(kubeconfigSecureFile)
