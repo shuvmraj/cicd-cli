@@ -227,9 +227,10 @@ export default function TerminalPlayground() {
 
   // Animate parameters using Framer Motion objects for CPU/GPU hardware accelerated 60fps rendering
   const deviceRotation = 
-    animPhase === 'closed' ? { rotateY: 180, rotateX: 12 } :
-    animPhase === 'revolving' ? { rotateY: 0, rotateX: 12 } :
-    { rotateY: 0, rotateX: 0 };
+    animPhase === 'closed' ? { rotateY: 180, rotateX: 55, scale: 0.82 } :
+    animPhase === 'revolving' ? { rotateY: 0, rotateX: 55, scale: 0.82 } :
+    animPhase === 'opening' ? { rotateY: 0, rotateX: 18, scale: 0.96 } :
+    { rotateY: 0, rotateX: 0, scale: 1 };
 
   const lidRotation = isLidOpen ? { rotateX: 0 } : { rotateX: -95 };
 

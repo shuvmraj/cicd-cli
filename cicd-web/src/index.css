@@ -1206,7 +1206,7 @@ a:hover {
   display: flex;
   justify-content: center;
   align-items: center;
-  perspective: 1500px;
+  perspective: 900px; /* Enhanced 3D depth perspective */
   width: 100%;
 }
 
