@@ -134,7 +134,6 @@ export default function TerminalPlayground() {
   const [showNotification, setShowNotification] = useState(false);
   
   const sectionRef = useRef(null);
-  const [hasObserved, setHasObserved] = useState(false);
 
   // Update menu bar clock dynamically with correct live date/time format
   useEffect(() => {
@@ -157,12 +156,13 @@ export default function TerminalPlayground() {
     return () => clearInterval(interval);
   }, []);
 
-  // Trigger Apple MacBook intro sequence ONLY when the section scrolls into view
+  // Trigger Apple MacBook intro sequence ONLY ONCE when the section scrolls into view
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !hasObserved) {
-          setHasObserved(true);
+        if (entry.isIntersecting) {
+          // Immediately disconnect observer to prevent animation replay when scrolling back up
+          observer.unobserve(entry.target);
           
           // Phase 1: Spin device to face forward (Y-axis 180 -> 0)
           const revTimer = setTimeout(() => {
@@ -186,7 +186,7 @@ export default function TerminalPlayground() {
           }, 9900);
         }
       },
-      { threshold: 0.15 } // Trigger when 15% of the section is visible
+      { threshold: 0.15 }
     );
 
     if (sectionRef.current) {
@@ -198,7 +198,7 @@ export default function TerminalPlayground() {
         observer.unobserve(sectionRef.current);
       }
     };
-  }, [hasObserved]);
+  }, []);
 
   // Types terminal command output only after laptop lid is open ('ready')
   useEffect(() => {
@@ -220,21 +220,18 @@ export default function TerminalPlayground() {
 
   const handleCommandChange = (cmdId) => {
     setSelectedCommand(cmdId);
-    // Dismiss help notification once they tap any icon
     setShowNotification(false);
   };
 
-  const getDeviceStyle = () => {
-    if (animPhase === 'closed') {
-      return { transform: 'rotateY(180deg) rotateX(12deg)' };
-    }
-    if (animPhase === 'revolving') {
-      return { transform: 'rotateY(0deg) rotateX(12deg)' };
-    }
-    return { transform: 'rotateY(0deg) rotateX(0deg)' };
-  };
-
   const isLidOpen = animPhase === 'opening' || animPhase === 'ready';
+
+  // Animate parameters using Framer Motion objects for CPU/GPU hardware accelerated 60fps rendering
+  const deviceRotation = 
+    animPhase === 'closed' ? { rotateY: 180, rotateX: 12 } :
+    animPhase === 'revolving' ? { rotateY: 0, rotateX: 12 } :
+    { rotateY: 0, rotateX: 0 };
+
+  const lidRotation = isLidOpen ? { rotateX: 0 } : { rotateX: -95 };
 
   return (
     <section ref={sectionRef} id="terminal" className="terminal-section">
@@ -243,9 +240,17 @@ export default function TerminalPlayground() {
       <div className="terminal-playground-layout" style={{ justifyContent: 'center' }}>
         {/* 3D CSS MacBook Container - Centered to take full screen width */}
         <div className="macbook-wrapper" style={{ maxWidth: '1000px', margin: '0 auto' }}>
-          <div className="macbook-device" style={getDeviceStyle()}>
-            {/* Display screen lid */}
-            <div className={`macbook-lid ${isLidOpen ? 'open' : ''}`}>
+          <motion.div 
+            className="macbook-device" 
+            animate={deviceRotation}
+            transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {/* Display screen lid - Animate with Framer Motion for maximum smoothness */}
+            <motion.div 
+              className="macbook-lid"
+              animate={lidRotation}
+              transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
+            >
               
               {/* Outer Lid cover (Apple outline logo) - visible when screen is closed */}
               {!isLidOpen && (
@@ -445,14 +450,14 @@ export default function TerminalPlayground() {
               )}
               
               <div className="macbook-logo">macbook</div>
-            </div>
+            </motion.div>
 
             {/* Laptop lower base keyboard plate */}
             <div className="macbook-base">
               <div className="macbook-notch" />
               <div className="macbook-trackpad" />
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </section>
