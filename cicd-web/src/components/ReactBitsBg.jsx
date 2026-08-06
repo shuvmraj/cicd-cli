@@ -98,20 +98,7 @@ export default function ReactBitsBg({ theme }) {
           p.x += (p.originalX - p.x) * 0.1;
           p.y += (p.originalY - p.y) * 0.1;
         }
-
-        // Draw small dot at grid intersections
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 1, 0, Math.PI * 2);
-        ctx.fill();
       });
-
-      // Optional: draw glowing links around mouse
-      if (mouse.x !== null && mouse.y !== null) {
-        ctx.beginPath();
-        ctx.arc(mouse.x, mouse.y, mouse.radius, 0, Math.PI * 2);
-        ctx.fillStyle = isLight ? 'rgba(127, 0, 255, 0.005)' : 'rgba(127, 0, 255, 0.01)';
-        ctx.fill();
-      }
 
       animationFrameId = requestAnimationFrame(render);
     };

@@ -264,11 +264,12 @@ a:hover {
 .hero-section {
   width: 100%;
   max-width: 1200px;
-  padding: 64px 24px 80px;
+  min-height: 90vh;
+  padding: 80px 24px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
-  text-align: center;
   z-index: 10;
 }
 
@@ -441,7 +442,11 @@ a:hover {
 .features-section {
   width: 100%;
   max-width: 1200px;
+  min-height: 70vh;
   padding: 80px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   border-top: 1px solid var(--border-color);
 }
 
@@ -526,7 +531,11 @@ a:hover {
 .terminal-section {
   width: 100%;
   max-width: 1200px;
+  min-height: 95vh;
   padding: 80px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   border-top: 1px solid var(--border-color);
 }
 
@@ -657,7 +666,11 @@ a:hover {
 .explorer-section {
   width: 100%;
   max-width: 1200px;
+  min-height: 85vh;
   padding: 80px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   border-top: 1px solid var(--border-color);
 }
 
@@ -771,7 +784,11 @@ a:hover {
 .sandbox-section {
   width: 100%;
   max-width: 1200px;
+  min-height: 90vh;
   padding: 80px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   border-top: 1px solid var(--border-color);
 }
 
