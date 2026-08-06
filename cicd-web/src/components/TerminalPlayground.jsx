@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const colors = {
@@ -131,6 +131,10 @@ export default function TerminalPlayground() {
   const [typedLines, setTypedLines] = useState([]);
   const [animPhase, setAnimPhase] = useState('closed');
   const [timeStr, setTimeStr] = useState('');
+  const [showNotification, setShowNotification] = useState(false);
+  
+  const sectionRef = useRef(null);
+  const [hasObserved, setHasObserved] = useState(false);
 
   // Update menu bar clock dynamically with correct live date/time format
   useEffect(() => {
@@ -153,26 +157,48 @@ export default function TerminalPlayground() {
     return () => clearInterval(interval);
   }, []);
 
-  // Trigger Apple MacBook intro sequence on mount
+  // Trigger Apple MacBook intro sequence ONLY when the section scrolls into view
   useEffect(() => {
-    const revTimer = setTimeout(() => {
-      setAnimPhase('revolving');
-    }, 400);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasObserved) {
+          setHasObserved(true);
+          
+          // Phase 1: Spin device to face forward (Y-axis 180 -> 0)
+          const revTimer = setTimeout(() => {
+            setAnimPhase('revolving');
+          }, 300);
 
-    const openTimer = setTimeout(() => {
-      setAnimPhase('opening');
-    }, 1600);
+          // Phase 2: Open screen lid (X-axis -95 -> 0)
+          const openTimer = setTimeout(() => {
+            setAnimPhase('opening');
+          }, 1500);
 
-    const readyTimer = setTimeout(() => {
-      setAnimPhase('ready');
-    }, 2800);
+          // Phase 3: Terminal starts typing, notification pops up
+          const readyTimer = setTimeout(() => {
+            setAnimPhase('ready');
+            setShowNotification(true);
+          }, 2700);
+
+          // Phase 4: Auto-dismiss help notification after 7 seconds
+          const notifTimer = setTimeout(() => {
+            setShowNotification(false);
+          }, 9700);
+        }
+      },
+      { threshold: 0.15 } // Trigger when 15% of the section is visible
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
 
     return () => {
-      clearTimeout(revTimer);
-      clearTimeout(openTimer);
-      clearTimeout(readyTimer);
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current);
+      }
     };
-  }, []);
+  }, [hasObserved]);
 
   // Types terminal command output only after laptop lid is open ('ready')
   useEffect(() => {
@@ -194,6 +220,8 @@ export default function TerminalPlayground() {
 
   const handleCommandChange = (cmdId) => {
     setSelectedCommand(cmdId);
+    // Dismiss help notification once they tap any icon
+    setShowNotification(false);
   };
 
   const getDeviceStyle = () => {
@@ -209,7 +237,7 @@ export default function TerminalPlayground() {
   const isLidOpen = animPhase === 'opening' || animPhase === 'ready';
 
   return (
-    <section id="terminal" className="terminal-section">
+    <section ref={sectionRef} id="terminal" className="terminal-section">
       <h2 className="section-title" style={{ marginBottom: '48px' }}>Command Reference Console</h2>
       
       <div className="terminal-playground-layout" style={{ justifyContent: 'center' }}>
@@ -236,7 +264,7 @@ export default function TerminalPlayground() {
                 <div 
                   className="macbook-screen macos-desktop"
                   style={{
-                    backgroundImage: 'url(https://raw.githubusercontent.com/Mach-OS/wallpapers/master/catalina-night.jpg)',
+                    backgroundImage: 'url(https://raw.githubusercontent.com/knmac/my_wallpapers/master/macos-big-sur-apple-layers-fluidic-colorful-wwdc-stock-4096x2304-1455.jpg)',
                     backgroundSize: 'cover',
                     backgroundPosition: 'center'
                   }}
@@ -268,6 +296,33 @@ export default function TerminalPlayground() {
                       <span className="live-clock">{timeStr}</span>
                     </div>
                   </div>
+
+                  {/* macOS Slide-in Notification Banner */}
+                  <AnimatePresence>
+                    {showNotification && (
+                      <motion.div 
+                        initial={{ opacity: 0, x: 80, y: -10 }}
+                        animate={{ opacity: 1, x: 0, y: 0 }}
+                        exit={{ opacity: 0, x: 80 }}
+                        transition={{ type: 'spring', damping: 15 }}
+                        className="macos-notification"
+                      >
+                        <div className="notification-header">
+                          <span className="notification-icon"></span>
+                          <span className="notification-title">Terminal Guide</span>
+                          <button 
+                            className="notification-close-btn"
+                            onClick={() => setShowNotification(false)}
+                          >
+                            ×
+                          </button>
+                        </div>
+                        <div className="notification-message">
+                          Tap any script icon on the desktop screen to execute the command.
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
                   {/* Desktop Interactive Shortcut Icons (Right aligned, takes 0 outer layout space) */}
                   <div className="macos-desktop-shortcuts">

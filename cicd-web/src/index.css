@@ -1587,3 +1587,78 @@ a:hover {
   max-width: 80px;
   line-height: 1.1;
 }
+
+/* macOS Notification Banner */
+.macos-notification {
+  position: absolute;
+  top: 32px;
+  right: 110px; /* Aligned next to desktop shortcuts */
+  width: 180px;
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 0.5px solid rgba(255, 255, 255, 0.35);
+  border-radius: 10px;
+  padding: 10px 12px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+.dark-theme .macos-notification {
+  background: rgba(28, 28, 30, 0.75);
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+}
+
+.notification-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #1c1c1e;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  position: relative;
+}
+.dark-theme .notification-header {
+  color: #f2f2f7;
+}
+
+.notification-icon {
+  font-size: 11px;
+}
+
+.notification-title {
+  flex-grow: 1;
+}
+
+.notification-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  cursor: default;
+  color: inherit;
+  opacity: 0.6;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s;
+}
+.notification-close-btn:hover {
+  opacity: 1;
+}
+
+.notification-message {
+  font-size: 8px;
+  line-height: 1.3;
+  color: #1c1c1e;
+  text-shadow: 0 0.5px 1px rgba(255, 255, 255, 0.4);
+}
+.dark-theme .notification-message {
+  color: #d1d1d6;
+  text-shadow: none;
+}
