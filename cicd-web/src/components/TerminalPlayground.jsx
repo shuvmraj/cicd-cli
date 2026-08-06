@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, Settings, Play, Laptop } from 'lucide-react';
+import { ChevronRight, Settings } from 'lucide-react';
 
 const colors = {
   green: (text) => <span style={{ color: 'var(--color-green)' }}>{text}</span>,
@@ -154,18 +154,38 @@ const commandInfo = {
 export default function TerminalPlayground() {
   const [selectedCommand, setSelectedCommand] = useState('detect');
   const [typedLines, setTypedLines] = useState([]);
-  const [isLidOpen, setIsLidOpen] = useState(false);
+  
+  // Animation phases: 'closed' -> 'revolving' -> 'opening' -> 'ready'
+  const [animPhase, setAnimPhase] = useState('closed');
 
-  // Trigger MacBook opening transition on click of any command or mounting
+  // Trigger Apple MacBook intro sequence on mount
   useEffect(() => {
-    // Open lid if closed
-    const timer = setTimeout(() => {
-      setIsLidOpen(true);
-    }, 300);
-    return () => clearTimeout(timer);
+    // Stage 1: Rotate / Revolving (closed laptop spins Y from 180 to 0)
+    const revTimer = setTimeout(() => {
+      setAnimPhase('revolving');
+    }, 400);
+
+    // Stage 2: Opening screen lid (rotateX flips open from -90 to 0)
+    const openTimer = setTimeout(() => {
+      setAnimPhase('opening');
+    }, 1600);
+
+    // Stage 3: Ready (Terminal starts typing commands)
+    const readyTimer = setTimeout(() => {
+      setAnimPhase('ready');
+    }, 2800);
+
+    return () => {
+      clearTimeout(revTimer);
+      clearTimeout(openTimer);
+      clearTimeout(readyTimer);
+    };
   }, []);
 
+  // Types terminal command output only after laptop lid is open ('ready')
   useEffect(() => {
+    if (animPhase !== 'ready') return;
+
     setTypedLines([]);
     const lines = terminalOutputs[selectedCommand];
     
@@ -178,16 +198,24 @@ export default function TerminalPlayground() {
     });
 
     return () => timers.forEach(clearTimeout);
-  }, [selectedCommand]);
+  }, [selectedCommand, animPhase]);
 
   const handleCommandChange = (cmdId) => {
     setSelectedCommand(cmdId);
-    // Give a nice close-and-open flap effect if user clicks
-    setIsLidOpen(false);
-    setTimeout(() => {
-      setIsLidOpen(true);
-    }, 400);
   };
+
+  // Determine transform overrides dynamically depending on current intro animation phase
+  const getDeviceStyle = () => {
+    if (animPhase === 'closed') {
+      return { transform: 'rotateY(180deg) rotateX(12deg)' };
+    }
+    if (animPhase === 'revolving') {
+      return { transform: 'rotateY(0deg) rotateX(12deg)' };
+    }
+    return { transform: 'rotateY(0deg) rotateX(0deg)' };
+  };
+
+  const isLidOpen = animPhase === 'opening' || animPhase === 'ready';
 
   return (
     <section id="terminal" className="terminal-section">
@@ -208,7 +236,9 @@ export default function TerminalPlayground() {
             <button
               key={cmd.id}
               onClick={() => handleCommandChange(cmd.id)}
+              disabled={animPhase !== 'ready'} // Disable buttons during the opening intro animation
               className={`cmd-btn ${selectedCommand === cmd.id ? 'active' : ''}`}
+              style={{ opacity: animPhase !== 'ready' ? 0.6 : 1 }}
             >
               <div>
                 <h4 className="cmd-btn-name">{cmd.name}</h4>
@@ -219,29 +249,46 @@ export default function TerminalPlayground() {
           ))}
         </div>
 
-        {/* 3D CSS MacBook Terminal Container (Column 2) */}
+        {/* 3D CSS MacBook Terminal Container (Column 2) - Larger size */}
         <div className="macbook-wrapper">
-          <div className="macbook-device">
+          <div className="macbook-device" style={getDeviceStyle()}>
             {/* Display screen lid */}
             <div className={`macbook-lid ${isLidOpen ? 'open' : ''}`}>
-              <div className="macbook-screen">
-                <div className="terminal-window-body" style={{ height: '100%', border: 'none', background: 'transparent', padding: '10px' }}>
-                  <AnimatePresence mode="popLayout">
-                    {typedLines.map((line, idx) => (
-                      <motion.div 
-                        key={idx}
-                        initial={{ opacity: 0, x: -3 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.1 }}
-                        style={{ minHeight: '18px', fontSize: '11px' }}
-                      >
-                        {line}
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                  <div className="cursor" style={{ height: '12px' }} />
+              
+              {/* Outer Lid panel (Apple outline logo) - visible when screen is closed */}
+              {!isLidOpen && (
+                <div className="macbook-lid-back">
+                  <svg 
+                    viewBox="0 0 170 170" 
+                    className="apple-logo-svg"
+                  >
+                    <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.39.13-9.13-1.92-14.21-6.14-3.1-2.61-6.95-7.23-11.56-13.86-5.07-7.24-9.28-15.86-12.62-25.86-3.35-10.02-5.03-19.88-5.03-29.59 0-14.83 3.82-26.62 11.47-35.38 7.64-8.75 17.13-13.19 28.46-13.31 5.92.12 11.72 1.83 17.41 5.16 5.69 3.33 10.05 5 13.08 5 2.5 0 6.64-1.54 12.44-4.63 7.07-3.76 13.79-5.54 20.17-5.35 15.17.62 26.68 6.44 34.52 17.47-13.19 8.01-19.68 18.99-19.46 32.96.22 10.66 4.16 19.5 11.84 26.54 7.67 7.03 16.7 10.74 27.09 11.13-2.11 6.09-4.8 12.18-8.07 18.25zm-22.37-97.77c0-7.39 2.65-14.4 7.96-21.03 6.68-8.13 15-12.56 24.96-13.28.1 1 .15 1.86.15 2.58 0 7.15-2.73 13.89-8.17 20.24-3.33 3.89-7.39 6.89-12.21 9.01-4.81 2.12-9.29 3.22-13.43 3.28-.79-.8-1.26-6.19-1.26-10.8z"/>
+                  </svg>
                 </div>
-              </div>
+              )}
+
+              {/* Inner Display (Terminal output screen) */}
+              {isLidOpen && (
+                <div className="macbook-screen">
+                  <div className="terminal-window-body" style={{ height: '100%', border: 'none', background: 'transparent', padding: '10px' }}>
+                    <AnimatePresence mode="popLayout">
+                      {typedLines.map((line, idx) => (
+                        <motion.div 
+                          key={idx}
+                          initial={{ opacity: 0, x: -3 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.1 }}
+                          style={{ minHeight: '18px', fontSize: '11px' }}
+                        >
+                          {line}
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                    <div className="cursor" style={{ height: '12px' }} />
+                  </div>
+                </div>
+              )}
+              
               <div className="macbook-logo">macbook</div>
             </div>
 
@@ -250,17 +297,6 @@ export default function TerminalPlayground() {
               <div className="macbook-notch" />
               <div className="macbook-trackpad" />
             </div>
-            
-            {/* Lid Toggle Play button */}
-            <button 
-              onClick={() => setIsLidOpen(prev => !prev)}
-              className="btn-theme" 
-              style={{ marginTop: '20px', width: 'auto', padding: '4px 12px', fontSize: '11px', display: 'flex', gap: '6px', alignItems: 'center' }}
-              title="Toggle MacBook Screen Lid"
-            >
-              <Laptop size={12} />
-              {isLidOpen ? 'Close Lid' : 'Open Lid'}
-            </button>
           </div>
         </div>
 
