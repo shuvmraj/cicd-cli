@@ -86,7 +86,6 @@ export default function Hero() {
             </div>
 
             <div className="widget-footer" style={{ fontFamily: 'var(--font-mono)' }}>
-              <span># no folder sharing</span>
               <span># dynamic path resolution</span>
             </div>
           </motion.div>

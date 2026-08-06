@@ -294,7 +294,7 @@ a:hover {
   font-weight: 800;
   max-width: 900px;
   color: var(--text-primary);
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   letter-spacing: -0.03em;
 }
 @media (min-width: 640px) {
@@ -318,7 +318,7 @@ a:hover {
   font-size: 16px;
   max-width: 650px;
   color: var(--text-secondary);
-  margin-bottom: 48px;
+  margin-bottom: 24px;
 }
 @media (min-width: 768px) {
   .hero-subtitle {

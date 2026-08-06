@@ -12,7 +12,6 @@ export default function Header({ theme, toggleTheme }) {
     <header className="app-header">
       <div className="logo-box">
         <span className="logo-title" style={{ fontFamily: 'var(--font-mono)' }}>CI/CD CLI</span>
-        <span className="logo-version">v1.0.0</span>
       </div>
       
       <div className="right-controls">
