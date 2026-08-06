@@ -24,14 +24,6 @@ export default function Hero() {
       <div className="hero-grid">
         {/* Left Column: Headline and Installer Widget */}
         <div className="hero-text-block">
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-left-mobile-center"
-          >
-            <span className="badge-cyan">cli command-line engine</span>
-          </motion.div>
           
           <motion.h1 
             className="hero-title"

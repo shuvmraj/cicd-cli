@@ -3,7 +3,7 @@ import React from 'react';
 export default function Footer() {
   return (
     <footer className="app-footer">
-      <span>© 2026 shuvmraj/cicd-cli. Released under the MIT License.</span>
+      <span>© 2026 cicd-cli. </span>
       <span>
         Designed & developed by{' '}
         <a 
