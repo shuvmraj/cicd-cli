@@ -137,7 +137,7 @@ function SceneGroup({ animPhase, children }) {
   // Target 3D coordinates based on current loading phase
   const targetY = animPhase === 'closed' ? Math.PI : 0;
   const targetX = (animPhase === 'closed' || animPhase === 'revolving') ? Math.PI / 6 : 0.05;
-  const targetScale = (animPhase === 'closed' || animPhase === 'revolving') ? 0.72 : 0.95;
+  const targetScale = (animPhase === 'closed' || animPhase === 'revolving') ? 0.95 : 1.28; // Increased scale for size
 
   useFrame((state) => {
     if (!groupRef.current) return;
@@ -151,7 +151,7 @@ function SceneGroup({ animPhase, children }) {
   });
 
   return (
-    <group ref={groupRef} position={[0, -0.32, 0]}>
+    <group ref={groupRef} position={[0, -0.4, 0]}>
       {children}
     </group>
   );
@@ -253,15 +253,17 @@ export default function TerminalPlayground() {
     setShowNotification(false);
   };
 
+  const isLidOpen = animPhase === 'opening' || animPhase === 'ready';
+
   return (
     <section ref={sectionRef} id="terminal" className="terminal-section">
       <h2 className="section-title" style={{ marginBottom: '48px' }}>Command Reference Console</h2>
       
       <div className="terminal-playground-layout" style={{ justifyContent: 'center' }}>
         {/* Real 3D WebGL MacBook Canvas Container */}
-        <div className="macbook-3d-canvas-container" style={{ width: '100%', maxWidth: '960px', height: '560px', position: 'relative' }}>
+        <div className="macbook-3d-canvas-container" style={{ width: '100%', maxWidth: '1000px', height: '620px', position: 'relative' }}>
           
-          <Canvas camera={{ position: [0, 0.35, 1.7], fov: 42 }}>
+          <Canvas camera={{ position: [0, 0.38, 1.6], fov: 38 }}>
             {/* Bright environment illumination */}
             <ambientLight intensity={0.9} />
             <directionalLight position={[10, 15, 6]} intensity={1.8} castShadow />
@@ -270,183 +272,191 @@ export default function TerminalPlayground() {
             <Suspense fallback={null}>
               <SceneGroup animPhase={animPhase}>
                 <Macbook3D>
-                  {/* macOS Desktop UI (Projected as HTML portal onto the GLB screen bezel) */}
-                  <div 
-                    className="macbook-screen macos-desktop"
-                    style={{
-                      backgroundImage: 'url(https://raw.githubusercontent.com/knmac/my_wallpapers/master/macos-big-sur-apple-layers-fluidic-colorful-wwdc-stock-4096x2304-1455.jpg)',
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                      width: '780px',
-                      height: '510px'
-                    }}
-                  >
-                    {/* macOS Menu bar */}
-                    <div className="macos-menubar">
-                      <div className="menubar-left">
-                        <span className="apple-menu-icon"></span>
-                        <span className="menubar-item active-app">Terminal</span>
-                        <span className="menubar-item">File</span>
-                        <span className="menubar-item">Edit</span>
-                        <span className="menubar-item">View</span>
-                        <span className="menubar-item">Go</span>
-                        <span className="menubar-item">Help</span>
-                      </div>
-                      <div className="menubar-right">
-                        <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor">
-                          <path d="M15.384 6.115a.485.485 0 0 0-.047-.736A12.444 12.444 0 0 0 8 3 12.44 12.44 0 0 0 .663 5.379a.485.485 0 0 0-.048.736l.518.518a.48.48 0 0 0 .634.027A10.457 10.457 0 0 1 8 4.768a10.457 10.457 0 0 1 6.233 1.892.48.48 0 0 0 .634-.027l.517-.518z"/>
-                          <path d="M12.553 8.946a.486.486 0 0 0-.02-.705A8.455 8.455 0 0 0 8 6.556a8.453 8.453 0 0 0-4.533 1.685.486.486 0 0 0-.02.705l.518.518a.48.48 0 0 0 .647.018A6.47 6.47 0 0 1 8 8.136a6.47 6.47 0 0 1 3.388 1.346.48.48 0 0 0 .647-.018l.518-.518z"/>
-                          <path d="M9.73 11.77a.486.486 0 0 0 .007-.677A4.475 4.475 0 0 0 8 10.106a4.475 4.475 0 0 0-1.737.987.486.486 0 0 0 .007.677l.518.518a.48.48 0 0 0 .673-.01A2.488 2.488 0 0 1 8 11.666a2.488 2.488 0 0 1 .539.613.48.48 0 0 0 .673.01l.518-.519zm-2.4 1.63a.5.5 0 0 0 0 .707l.67.67a.5.5 0 0 0 .707 0l.67-.67a.5.5 0 0 0 0-.707l-.67-.67a.5.5 0 0 0-.707 0l-.67.67z"/>
-                        </svg>
-                        <svg width="12" height="10" viewBox="0 0 16 16" fill="currentColor">
-                          <rect x="1" y="4" width="12" height="8" rx="1" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                          <path d="M14 6h1v4h-1z" />
-                          <rect x="3" y="6" width="8" height="4" fill="currentColor" />
-                        </svg>
-                        <span className="live-clock">{timeStr}</span>
-                      </div>
-                    </div>
-
-                    {/* macOS Slide-in Notification Banner */}
-                    <AnimatePresence>
-                      {showNotification && (
-                        <motion.div 
-                          initial={{ opacity: 0, x: 80, y: -10 }}
-                          animate={{ opacity: 1, x: 0, y: 0 }}
-                          exit={{ opacity: 0, x: 80 }}
-                          transition={{ type: 'spring', damping: 15 }}
-                          className="macos-notification"
-                        >
-                          <div className="notification-header">
-                            <span className="notification-icon"></span>
-                            <span className="notification-title">Terminal Guide</span>
-                            <button 
-                              className="notification-close-btn"
-                              onClick={() => setShowNotification(false)}
-                            >
-                              ×
-                            </button>
+                  {/* macOS Screen contents - Fades in ONLY when laptop finished opening and reaches 'ready' state */}
+                  <AnimatePresence>
+                    {animPhase === 'ready' && (
+                      <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.8, ease: 'easeInOut' }}
+                        className="macbook-screen macos-desktop"
+                        style={{
+                          backgroundImage: 'url(https://raw.githubusercontent.com/knmac/my_wallpapers/master/macos-big-sur-apple-layers-fluidic-colorful-wwdc-stock-4096x2304-1455.jpg)',
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          width: '780px',
+                          height: '510px'
+                        }}
+                      >
+                        {/* macOS Menu bar */}
+                        <div className="macos-menubar">
+                          <div className="menubar-left">
+                            <span className="apple-menu-icon"></span>
+                            <span className="menubar-item active-app">Terminal</span>
+                            <span className="menubar-item">File</span>
+                            <span className="menubar-item">Edit</span>
+                            <span className="menubar-item">View</span>
+                            <span className="menubar-item">Go</span>
+                            <span className="menubar-item">Help</span>
                           </div>
-                          <div className="notification-message">
-                            Tap any script icon on the desktop screen to execute the command.
+                          <div className="menubar-right">
+                            <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor">
+                              <path d="M15.384 6.115a.485.485 0 0 0-.047-.736A12.444 12.444 0 0 0 8 3 12.44 12.44 0 0 0 .663 5.379a.485.485 0 0 0-.048.736l.518.518a.48.48 0 0 0 .634.027A10.457 10.457 0 0 1 8 4.768a10.457 10.457 0 0 1 6.233 1.892.48.48 0 0 0 .634-.027l.517-.518z"/>
+                              <path d="M12.553 8.946a.486.486 0 0 0-.02-.705A8.455 8.455 0 0 0 8 6.556a8.453 8.453 0 0 0-4.533 1.685.486.486 0 0 0-.02.705l.518.518a.48.48 0 0 0 .647.018A6.47 6.47 0 0 1 8 8.136a6.47 6.47 0 0 1 3.388 1.346.48.48 0 0 0 .647-.018l.518-.518z"/>
+                              <path d="M9.73 11.77a.486.486 0 0 0 .007-.677A4.475 4.475 0 0 0 8 10.106a4.475 4.475 0 0 0-1.737.987.486.486 0 0 0 .007.677l.518.518a.48.48 0 0 0 .673-.01A2.488 2.488 0 0 1 8 11.666a2.488 2.488 0 0 1 .539.613.48.48 0 0 0 .673.01l.518-.519zm-2.4 1.63a.5.5 0 0 0 0 .707l.67.67a.5.5 0 0 0 .707 0l.67-.67a.5.5 0 0 0 0-.707l-.67-.67a.5.5 0 0 0-.707 0l-.67.67z"/>
+                            </svg>
+                            <svg width="12" height="10" viewBox="0 0 16 16" fill="currentColor">
+                              <rect x="1" y="4" width="12" height="8" rx="1" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                              <path d="M14 6h1v4h-1z" />
+                              <rect x="3" y="6" width="8" height="4" fill="currentColor" />
+                            </svg>
+                            <span className="live-clock">{timeStr}</span>
                           </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-
-                    {/* Desktop Interactive Shortcut Icons */}
-                    <div className="macos-desktop-shortcuts">
-                      {desktopShortcuts.map((shortcut) => (
-                        <button
-                          key={shortcut.id}
-                          onClick={() => handleCommandChange(shortcut.id)}
-                          disabled={animPhase !== 'ready'}
-                          className={`desktop-icon-btn ${selectedCommand === shortcut.id ? 'active' : ''}`}
-                          title={`Run ${shortcut.name}`}
-                        >
-                          <div className="desktop-icon-wrapper">
-                            <span className="desktop-emoji-icon">{shortcut.icon}</span>
-                          </div>
-                          <span className="desktop-icon-label">{shortcut.name}</span>
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* Floating macOS Terminal App Window */}
-                    <div className="macos-terminal-window" style={{ right: '140px', left: '16px' }}>
-                      <div className="macos-terminal-header">
-                        <div className="macos-dot-group">
-                          <div className="macos-dot macos-red" />
-                          <div className="macos-dot macos-yellow" />
-                          <div className="macos-dot macos-green" />
                         </div>
-                        <span className="macos-terminal-title">shubhams — cicd-cli — 80×24</span>
-                      </div>
-                      <div className="macos-terminal-body">
-                        <AnimatePresence mode="popLayout">
-                          {typedLines.map((line, idx) => (
+
+                        {/* macOS Slide-in Notification Banner */}
+                        <AnimatePresence>
+                          {showNotification && (
                             <motion.div 
-                              key={idx}
-                              initial={{ opacity: 0, x: -2 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ duration: 0.08 }}
-                              style={{ minHeight: '14px', marginBottom: '3px' }}
-                              dangerouslySetInnerHTML={{ __html: line }}
-                            />
-                          ))}
+                              initial={{ opacity: 0, x: 80, y: -10 }}
+                              animate={{ opacity: 1, x: 0, y: 0 }}
+                              exit={{ opacity: 0, x: 80 }}
+                              transition={{ type: 'spring', damping: 15 }}
+                              className="macos-notification"
+                            >
+                              <div className="notification-header">
+                                <span className="notification-icon"></span>
+                                <span className="notification-title">Terminal Guide</span>
+                                <button 
+                                  className="notification-close-btn"
+                                  onClick={() => setShowNotification(false)}
+                                >
+                                  ×
+                                </button>
+                              </div>
+                              <div className="notification-message">
+                                Tap any script icon on the desktop screen to execute the command.
+                              </div>
+                            </motion.div>
+                          )}
                         </AnimatePresence>
-                        <div className="cursor" style={{ height: '11px' }} />
-                      </div>
-                    </div>
 
-                    {/* macOS Dock */}
-                    <div className="macos-dock-wrapper">
-                      <div className="macos-dock">
-                        {/* Finder */}
-                        <div className="dock-item">
-                          <svg className="dock-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect width="64" height="64" rx="14" fill="url(#finderGrad)" />
-                            <path d="M32 6C17.64 6 6 17.64 6 32c0 14.36 11.64 26 26 26c1.64 0 3.25-.15 4.81-.44V34.56H16.48v-4.88H36.8V6.44C35.25 6.15 33.64 6 32 6z" fill="#58A6FF" />
-                            <path d="M32 6c14.36 0 26 11.64 26 26c0 14.36-11.64 26-26 26c-1.64 0-3.25-.15-4.81-.44V34.56h20.32v-4.88H27.2V6.44C28.75 6.15 30.36 6 32 6z" fill="#0A84FF" />
-                            <path d="M22 28a2.5 2.5 0 100-5 2.5 2.5 0 000 5zm20 0a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" fill="#1C1C1E" />
-                            <path d="M27.2 6.44v23.24H36.8v4.88H16.48v9.42c2.4 4.54 6.74 7.84 11.89 8.84v-9.38h7.24a4.4 4.4 0 004.4-4.4v-4.52" stroke="#1C1C1E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                            <path d="M25 43.5c3.5 3.5 10.5 3.5 14 0" stroke="#1C1C1E" strokeWidth="3" strokeLinecap="round" />
-                            <defs>
-                              <linearGradient id="finderGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-                                <stop stopColor="#E5F1FF" />
-                                <stop offset="1" stopColor="#A8D1FF" />
-                              </linearGradient>
-                            </defs>
-                          </svg>
+                        {/* Desktop Interactive Shortcut Icons */}
+                        <div className="macos-desktop-shortcuts">
+                          {desktopShortcuts.map((shortcut) => (
+                            <button
+                              key={shortcut.id}
+                              onClick={() => handleCommandChange(shortcut.id)}
+                              disabled={animPhase !== 'ready'}
+                              className={`desktop-icon-btn ${selectedCommand === shortcut.id ? 'active' : ''}`}
+                              title={`Run ${shortcut.name}`}
+                            >
+                              <div className="desktop-icon-wrapper">
+                                <span className="desktop-emoji-icon">{shortcut.icon}</span>
+                              </div>
+                              <span className="desktop-icon-label">{shortcut.name}</span>
+                            </button>
+                          ))}
                         </div>
-                        {/* Safari */}
-                        <div className="dock-item">
-                          <svg className="dock-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="32" cy="32" r="28" fill="url(#safariSky)" />
-                            <circle cx="32" cy="32" r="23" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
-                            <path d="M32 8A24 24 0 1056 32 24.03 24.03 0 0032 8zm0 45a21 21 0 1121-21 21.02 21.02 0 01-21 21z" fill="url(#safariRing)" />
-                            <path d="M43.5 20.5l-16.2 8.7 4.7 4.7 11.5-13.4z" fill="#FF453A" />
-                            <path d="M20.5 43.5l16.2-8.7-4.7-4.7-11.5 13.4z" fill="#F2F2F7" />
-                            <circle cx="32" cy="32" r="2.5" fill="#FFD60A" />
-                            <path d="M32 9v2M32 53v2M9 32h2M53 32h2" stroke="rgba(255,255,255,0.8)" strokeWidth="1.5" strokeLinecap="round" />
-                            <defs>
-                              <linearGradient id="safariSky" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
-                                <stop stopColor="#0A84FF" />
-                                <stop offset="1" stopColor="#0055B3" />
-                              </linearGradient>
-                              <linearGradient id="safariRing" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
-                                <stop stopColor="#FFD60A" stopOpacity="0.8" />
-                                <stop offset="1" stopColor="#FF453A" stopOpacity="0.8" />
-                              </linearGradient>
-                            </defs>
-                          </svg>
-                        </div>
-                        {/* Settings */}
-                        <div className="dock-item">
-                          <svg className="dock-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect width="64" height="64" rx="14" fill="url(#settingsMetal)" />
-                            <circle cx="32" cy="32" r="14" fill="#8E8E93" stroke="#AEAEB2" strokeWidth="1.5" />
-                            <circle cx="32" cy="32" r="8" fill="#D1D1D6" />
-                            <path d="M32 14v4M32 46v4M14 32h4M46 32h4M19.3 19.3l2.8 2.8M41.9 41.9l2.8 2.8M19.3 44.7l2.8-2.8M41.9 22.1l2.8-2.8" stroke="#AEAEB2" strokeWidth="3" strokeLinecap="round" />
-                            <circle cx="32" cy="32" r="4" fill="#505054" />
-                            <defs>
-                              <linearGradient id="settingsMetal" x1="0" y1="0" x2="0" y2="64" gradientUnits="userSpaceOnUse">
-                                <stop stopColor="#F2F2F7" />
-                                <stop offset="1" stopColor="#C7C7CC" />
-                              </linearGradient>
-                            </defs>
-                          </svg>
-                        </div>
-                        {/* Terminal app */}
-                        <div className="dock-item active">
-                          <div className="terminal-dock-icon">
-                            <span>&gt;_</span>
+
+                        {/* Floating macOS Terminal App Window */}
+                        <div className="macos-terminal-window" style={{ right: '140px', left: '16px' }}>
+                          <div className="macos-terminal-header">
+                            <div className="macos-dot-group">
+                              <div className="macos-dot macos-red" />
+                              <div className="macos-dot macos-yellow" />
+                              <div className="macos-dot macos-green" />
+                            </div>
+                            <span className="macos-terminal-title">shubhams — cicd-cli — 80×24</span>
                           </div>
-                          <div className="active-dot" />
+                          <div className="macos-terminal-body">
+                            <AnimatePresence mode="popLayout">
+                              {typedLines.map((line, idx) => (
+                                <motion.div 
+                                  key={idx}
+                                  initial={{ opacity: 0, x: -2 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ duration: 0.08 }}
+                                  style={{ minHeight: '14px', marginBottom: '3px' }}
+                                  dangerouslySetInnerHTML={{ __html: line }}
+                                />
+                              ))}
+                            </AnimatePresence>
+                            <div className="cursor" style={{ height: '11px' }} />
+                          </div>
                         </div>
-                      </div>
-                    </div>
-                  </div>
+
+                        {/* macOS Dock */}
+                        <div className="macos-dock-wrapper">
+                          <div className="macos-dock">
+                            {/* Finder */}
+                            <div className="dock-item">
+                              <svg className="dock-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="64" height="64" rx="14" fill="url(#finderGrad)" />
+                                <path d="M32 6C17.64 6 6 17.64 6 32c0 14.36 11.64 26 26 26c1.64 0 3.25-.15 4.81-.44V34.56H16.48v-4.88H36.8V6.44C35.25 6.15 33.64 6 32 6z" fill="#58A6FF" />
+                                <path d="M32 6c14.36 0 26 11.64 26 26c0 14.36-11.64 26-26 26c-1.64 0-3.25-.15-4.81-.44V34.56h20.32v-4.88H27.2V6.44C28.75 6.15 30.36 6 32 6z" fill="#0A84FF" />
+                                <path d="M22 28a2.5 2.5 0 100-5 2.5 2.5 0 000 5zm20 0a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" fill="#1C1C1E" />
+                                <path d="M27.2 6.44v23.24H36.8v4.88H16.48v9.42c2.4 4.54 6.74 7.84 11.89 8.84v-9.38h7.24a4.4 4.4 0 004.4-4.4v-4.52" stroke="#1C1C1E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M25 43.5c3.5 3.5 10.5 3.5 14 0" stroke="#1C1C1E" strokeWidth="3" strokeLinecap="round" />
+                                <defs>
+                                  <linearGradient id="finderGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+                                    <stop stopColor="#E5F1FF" />
+                                    <stop offset="1" stopColor="#A8D1FF" />
+                                  </linearGradient>
+                                </defs>
+                              </svg>
+                            </div>
+                            {/* Safari */}
+                            <div className="dock-item">
+                              <svg className="dock-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="32" cy="32" r="28" fill="url(#safariSky)" />
+                                <circle cx="32" cy="32" r="23" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
+                                <path d="M32 8A24 24 0 1056 32 24.03 24.03 0 0032 8zm0 45a21 21 0 1121-21 21.02 21.02 0 01-21 21z" fill="url(#safariRing)" />
+                                <path d="M43.5 20.5l-16.2 8.7 4.7 4.7 11.5-13.4z" fill="#FF453A" />
+                                <path d="M20.5 43.5l16.2-8.7-4.7-4.7-11.5 13.4z" fill="#F2F2F7" />
+                                <circle cx="32" cy="32" r="2.5" fill="#FFD60A" />
+                                <path d="M32 9v2M32 53v2M9 32h2M53 32h2" stroke="rgba(255,255,255,0.8)" strokeWidth="1.5" strokeLinecap="round" />
+                                <defs>
+                                  <linearGradient id="safariSky" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+                                    <stop stopColor="#0A84FF" />
+                                    <stop offset="1" stopColor="#0055B3" />
+                                  </linearGradient>
+                                  <linearGradient id="safariRing" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+                                    <stop stopColor="#FFD60A" stopOpacity="0.8" />
+                                    <stop offset="1" stopColor="#FF453A" stopOpacity="0.8" />
+                                  </linearGradient>
+                                </defs>
+                              </svg>
+                            </div>
+                            {/* Settings */}
+                            <div className="dock-item">
+                              <svg className="dock-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="64" height="64" rx="14" fill="url(#settingsMetal)" />
+                                <circle cx="32" cy="32" r="14" fill="#8E8E93" stroke="#AEAEB2" strokeWidth="1.5" />
+                                <circle cx="32" cy="32" r="8" fill="#D1D1D6" />
+                                <path d="M32 14v4M32 46v4M14 32h4M46 32h4M19.3 19.3l2.8 2.8M41.9 41.9l2.8 2.8M19.3 44.7l2.8-2.8M41.9 22.1l2.8-2.8" stroke="#AEAEB2" strokeWidth="3" strokeLinecap="round" />
+                                <circle cx="32" cy="32" r="4" fill="#505054" />
+                                <defs>
+                                  <linearGradient id="settingsMetal" x1="0" y1="0" x2="0" y2="64" gradientUnits="userSpaceOnUse">
+                                    <stop stopColor="#F2F2F7" />
+                                    <stop offset="1" stopColor="#C7C7CC" />
+                                  </linearGradient>
+                                </defs>
+                              </svg>
+                            </div>
+                            {/* Terminal app */}
+                            <div className="dock-item active">
+                              <div className="terminal-dock-icon">
+                                <span>&gt;_</span>
+                              </div>
+                              <div className="active-dot" />
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </Macbook3D>
               </SceneGroup>
               {/* Studio Environment Map for detailed metallic/aluminum shader highlights */}
