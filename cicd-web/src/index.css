@@ -1107,16 +1107,10 @@ a:hover {
 }
 
 .terminal-playground-layout {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 32px;
+  display: flex;
+  justify-content: center;
   align-items: center;
   width: 100%;
-}
-@media (min-width: 1024px) {
-  .terminal-playground-layout {
-    grid-template-columns: 1fr 2.6fr;
-  }
 }
 
 .terminal-info-card {
@@ -1219,7 +1213,7 @@ a:hover {
 .macbook-device {
   position: relative;
   width: 100%;
-  max-width: 840px; /* Scale up to max size */
+  max-width: 960px; /* Scale up to max size */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1525,4 +1519,71 @@ a:hover {
   border-radius: 50%;
   margin-top: 2px;
   opacity: 0.9;
+}
+
+/* macOS Desktop Shortcuts */
+.macos-desktop-shortcuts {
+  position: absolute;
+  top: 32px;
+  right: 12px;
+  width: 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 10;
+  max-height: calc(100% - 100px);
+  overflow-y: auto;
+}
+
+.desktop-icon-btn {
+  background: transparent;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  cursor: default;
+  padding: 4px;
+  border-radius: 6px;
+  transition: background 0.15s;
+  width: 100%;
+}
+.desktop-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+.desktop-icon-btn.active {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.desktop-icon-wrapper {
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 0.5px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+.dark-theme .desktop-icon-wrapper {
+  background: rgba(0, 0, 0, 0.2);
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+}
+
+.desktop-emoji-icon {
+  font-size: 14px;
+}
+
+.desktop-icon-label {
+  font-size: 8px;
+  font-weight: 500;
+  color: #ffffff;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+  word-break: break-all;
+  max-width: 80px;
+  line-height: 1.1;
 }

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight } from 'lucide-react';
 
 const colors = {
   green: (text) => <span style={{ color: 'var(--color-green)' }}>{text}</span>,
@@ -116,6 +115,17 @@ const terminalOutputs = {
   ]
 };
 
+// Desktop Icons vector descriptors representing custom Mac shortcut files
+const desktopShortcuts = [
+  { id: 'init', name: 'init.sh', icon: '⚙️' },
+  { id: 'detect', name: 'detect.sh', icon: '🔍' },
+  { id: 'generate', name: 'generate.sh', icon: '⚡' },
+  { id: 'validate', name: 'validate.sh', icon: '🛡️' },
+  { id: 'explain', name: 'explain.sh', icon: '📊' },
+  { id: 'convert', name: 'convert.sh', icon: '🔄' },
+  { id: 'doctor', name: 'doctor.sh', icon: '🩺' },
+];
+
 export default function TerminalPlayground() {
   const [selectedCommand, setSelectedCommand] = useState('detect');
   const [typedLines, setTypedLines] = useState([]);
@@ -202,36 +212,9 @@ export default function TerminalPlayground() {
     <section id="terminal" className="terminal-section">
       <h2 className="section-title" style={{ marginBottom: '48px' }}>Command Reference Console</h2>
       
-      <div className="terminal-playground-layout">
-        {/* Sidebar Selector (Column 1) */}
-        <div className="terminal-sidebar">
-          {[
-            { id: 'init', name: 'cicd init', desc: 'Initialize configuration' },
-            { id: 'detect', name: 'cicd detect', desc: 'Auto-scan codebases' },
-            { id: 'generate', name: 'cicd generate', desc: 'Compile pipeline configs' },
-            { id: 'validate', name: 'cicd validate', desc: 'Audit security & graphs' },
-            { id: 'explain', name: 'cicd explain', desc: 'Render workflow cycles' },
-            { id: 'convert', name: 'cicd convert', desc: 'Translate specifications' },
-            { id: 'doctor', name: 'cicd doctor', desc: 'Check local binaries' },
-          ].map((cmd) => (
-            <button
-              key={cmd.id}
-              onClick={() => handleCommandChange(cmd.id)}
-              disabled={animPhase !== 'ready'}
-              className={`cmd-btn ${selectedCommand === cmd.id ? 'active' : ''}`}
-              style={{ opacity: animPhase !== 'ready' ? 0.6 : 1 }}
-            >
-              <div>
-                <h4 className="cmd-btn-name">{cmd.name}</h4>
-                <p className="cmd-btn-desc">{cmd.desc}</p>
-              </div>
-              <ChevronRight size={16} />
-            </button>
-          ))}
-        </div>
-
-        {/* 3D CSS MacBook Container (Column 2) - Configured with Catalina Night Wallpaper */}
-        <div className="macbook-wrapper">
+      <div className="terminal-playground-layout" style={{ justifyContent: 'center' }}>
+        {/* 3D CSS MacBook Container - Centered to take full screen width */}
+        <div className="macbook-wrapper" style={{ maxWidth: '1000px', margin: '0 auto' }}>
           <div className="macbook-device" style={getDeviceStyle()}>
             {/* Display screen lid */}
             <div className={`macbook-lid ${isLidOpen ? 'open' : ''}`}>
@@ -286,8 +269,26 @@ export default function TerminalPlayground() {
                     </div>
                   </div>
 
-                  {/* Floating macOS Terminal App Window */}
-                  <div className="macos-terminal-window">
+                  {/* Desktop Interactive Shortcut Icons (Right aligned, takes 0 outer layout space) */}
+                  <div className="macos-desktop-shortcuts">
+                    {desktopShortcuts.map((shortcut) => (
+                      <button
+                        key={shortcut.id}
+                        onClick={() => handleCommandChange(shortcut.id)}
+                        disabled={animPhase !== 'ready'}
+                        className={`desktop-icon-btn ${selectedCommand === shortcut.id ? 'active' : ''}`}
+                        title={`Run ${shortcut.name}`}
+                      >
+                        <div className="desktop-icon-wrapper">
+                          <span className="desktop-emoji-icon">{shortcut.icon}</span>
+                        </div>
+                        <span className="desktop-icon-label">{shortcut.name}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Floating macOS Terminal App Window (Left-aligned on desktop screen) */}
+                  <div className="macos-terminal-window" style={{ right: '140px', left: '16px' }}>
                     <div className="macos-terminal-header">
                       <div className="macos-dot-group">
                         <div className="macos-dot macos-red" />
