@@ -74,12 +74,15 @@ export default function Hero() {
             </div>
 
             {/* Changed inline style color to #f8fafc (high contrast white) so text is visible on the dark background */}
-            <div className="code-box">
-              <span className="code-text" style={{ color: '#f8fafc', fontFamily: 'var(--font-mono)' }}>{getInstallCmd()}</span>
+            <div className="code-box" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', overflow: 'hidden' }}>
+              <div style={{ flexGrow: 1, overflowX: 'auto', marginRight: '12px', display: 'flex', alignItems: 'center' }}>
+                <span className="code-text" style={{ color: '#f8fafc', fontFamily: 'var(--font-mono)' }}>{getInstallCmd()}</span>
+              </div>
               <button 
                 onClick={handleCopy}
                 className="icon-btn"
                 title="Copy to clipboard"
+                style={{ flexShrink: 0 }}
               >
                 {copied ? <Check size={16} style={{ color: 'var(--color-green)' }} /> : <Clipboard size={16} />}
               </button>
