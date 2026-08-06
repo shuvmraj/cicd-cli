@@ -1,36 +1,25 @@
 #!/bin/bash
-# Installation script for the 'cicd' CLI tool
+# Installation script for the 'cicd' CLI tool downloaded from GitHub Releases
 
-# Define target directories
 INSTALL_DIR="$HOME/.cicd/bin"
 JAR_NAME="cicd-cli.jar"
 BIN_NAME="cicd"
+RELEASE_URL="https://github.com/shuvmraj/cicd-cli/releases/download/v1.0.0/cicd-cli.jar"
 
 echo "=== Installing cicd CLI ==="
 
 # 1. Create installation directory
 mkdir -p "$INSTALL_DIR"
 
-# 2. Locate jar file from source path
-SOURCE_JAR=""
-if [ -f "./cicd-cli/target/cicd-cli-1.0-SNAPSHOT.jar" ]; then
-    SOURCE_JAR="./cicd-cli/target/cicd-cli-1.0-SNAPSHOT.jar"
-elif [ -f "./target/cicd-cli-1.0-SNAPSHOT.jar" ]; then
-    SOURCE_JAR="./target/cicd-cli-1.0-SNAPSHOT.jar"
-elif [ -f "./cicd-cli.jar" ]; then
-    SOURCE_JAR="./cicd-cli.jar"
-fi
-
-if [ -z "$SOURCE_JAR" ]; then
-    echo "Error: Could not find cicd-cli-1.0-SNAPSHOT.jar in current directory."
-    echo "Please place the JAR file in this folder and run again."
+# 2. Download the JAR file from GitHub Releases
+echo "Downloading executable from GitHub Releases..."
+if ! curl -L -o "$INSTALL_DIR/$JAR_NAME" "$RELEASE_URL"; then
+    echo "Error: Failed to download the JAR from $RELEASE_URL."
+    echo "Please check your internet connection or verify the release exists."
     exit 1
 fi
 
-# 3. Copy jar file to install location
-cp "$SOURCE_JAR" "$INSTALL_DIR/$JAR_NAME"
-
-# 4. Generate the wrapper script
+# 3. Generate the wrapper script
 cat << 'EOF' > "$INSTALL_DIR/$BIN_NAME"
 #!/bin/bash
 # Executable wrapper for cicd CLI
@@ -42,10 +31,10 @@ fi
 java -jar "$JAR_PATH" "$@"
 EOF
 
-# 5. Make wrapper script executable
+# 4. Make wrapper script executable
 chmod +x "$INSTALL_DIR/$BIN_NAME"
 
-# 6. Try to symlink to /usr/local/bin for global command access
+# 5. Try to symlink to /usr/local/bin for global command access
 echo "Attempting to create global symlink in /usr/local/bin..."
 if sudo ln -sf "$INSTALL_DIR/$BIN_NAME" /usr/local/bin/$BIN_NAME 2>/dev/null; then
     echo "Success: Global symlink created!"
