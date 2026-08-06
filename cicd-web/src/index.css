@@ -289,8 +289,8 @@ a:hover {
 }
 
 .hero-title {
-  font-size: 40px;
-  line-height: 1.1;
+  font-size: 32px;
+  line-height: 1.15;
   font-weight: 800;
   max-width: 900px;
   color: var(--text-primary);
@@ -299,12 +299,12 @@ a:hover {
 }
 @media (min-width: 640px) {
   .hero-title {
-    font-size: 56px;
+    font-size: 44px;
   }
 }
 @media (min-width: 768px) {
   .hero-title {
-    font-size: 72px;
+    font-size: 54px;
   }
 }
 
