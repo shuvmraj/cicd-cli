@@ -29,12 +29,12 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22 # Matched to local Node 22/24 version to align package-lock versions
           cache: 'npm'
           cache-dependency-path: 'cicd-web/package-lock.json'
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm install # Gracefully resolves peer dependency conflicts
         working-directory: cicd-web
 
       - name: Build Application
