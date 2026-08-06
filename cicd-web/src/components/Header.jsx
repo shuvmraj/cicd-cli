@@ -18,13 +18,6 @@ export default function Header({ theme, toggleTheme }) {
         </div>
       </div>
       
-      <nav className="nav-links">
-        <a href="#features" className="nav-link">Features</a>
-        <a href="#terminal" className="nav-link">CLI Playground</a>
-        <a href="#explorer" className="nav-link">Stack Templates</a>
-        <a href="#sandbox" className="nav-link">Rule Sandbox</a>
-      </nav>
-
       <div className="right-controls">
         {/* Developer Badge */}
         <a 

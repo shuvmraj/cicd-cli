@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Settings, Info } from 'lucide-react';
 
 const colors = {
   green: (text) => <span style={{ color: 'var(--color-green)' }}>{text}</span>,
@@ -102,6 +102,55 @@ const terminalOutputs = {
   ]
 };
 
+const commandInfo = {
+  init: {
+    usage: 'cicd init [OPTIONS]',
+    description: 'Initializes the CLI in the current directory by creating a `.cicd-config.json` file. Allows customizing compilation triggers and overriding detector assumptions.',
+    options: ['-d, --dir=<targetDir> : Set configuration folder location']
+  },
+  detect: {
+    usage: 'cicd detect [OPTIONS]',
+    description: 'Scans the directory for configuration descriptors, package assets, and build configurations to construct the normalized stack blueprint.',
+    options: ['-d, --dir=<targetDir> : Directory path to execute scan']
+  },
+  generate: {
+    usage: 'cicd generate <platform> [OPTIONS]',
+    description: 'Compiles custom Mustache templates to generate optimized workflow pipelines. Supports creating custom Dockerfiles as well.',
+    options: [
+      '<platform>            : github, gitlab, jenkins, azure, docker',
+      '-w, --write           : Write output directly to standard directory',
+      '-o, --output=<path>   : Export pipeline to custom file path'
+    ]
+  },
+  validate: {
+    usage: 'cicd validate [OPTIONS]',
+    description: 'Audits pipeline structure using a multi-rule verification framework. Runs dependency graph sort to detect cyclic deadlocks and scans for plain credentials.',
+    options: [
+      '-f, --file=<filePath> : Custom pipeline configuration file path',
+      '-d, --dir=<baseDir>   : Root directory to analyze context'
+    ]
+  },
+  explain: {
+    usage: 'cicd explain [OPTIONS]',
+    description: 'Constructs the execution tree, highlighting parallel jobs, stage sequences, and estimated compilation build times.',
+    options: ['-f, --file=<filePath> : Path to the target pipeline configuration file']
+  },
+  convert: {
+    usage: 'cicd convert <source> <target> [OPTIONS]',
+    description: 'Translates pipeline syntax directly between different platform structures. Maps script blocks and cache mappings dynamically.',
+    options: [
+      '<source> <target>     : Options are github, gitlab, jenkins, azure',
+      '-f, --file=<filePath> : Path of source configuration to convert',
+      '-o, --output=<path>   : Write translated schema to custom location'
+    ]
+  },
+  doctor: {
+    usage: 'cicd doctor',
+    description: 'Checks and reports the health of the system toolchains. Evaluates Git, Docker, Java, Node, kubectl, and Helm versions.',
+    options: []
+  }
+};
+
 export default function TerminalPlayground() {
   const [selectedCommand, setSelectedCommand] = useState('detect');
   const [typedLines, setTypedLines] = useState([]);
@@ -123,18 +172,19 @@ export default function TerminalPlayground() {
 
   return (
     <section id="terminal" className="terminal-section">
-      <h2 className="section-title">Interactive Command Playground</h2>
-      <div className="terminal-grid">
-        {/* Menu Selector */}
+      <h2 className="section-title" style={{ marginBottom: '48px' }}>Command Reference Console</h2>
+      
+      <div className="terminal-playground-layout">
+        {/* Sidebar Selector (Column 1) */}
         <div className="terminal-sidebar">
           {[
-            { id: 'init', name: 'cicd init', desc: 'Initialize local workspace' },
-            { id: 'detect', name: 'cicd detect', desc: 'Inspect project stack' },
-            { id: 'generate', name: 'cicd generate', desc: 'Output CI configuration' },
-            { id: 'validate', name: 'cicd validate', desc: 'Audit syntax & rules' },
-            { id: 'explain', name: 'cicd explain', desc: 'Inspect stages runtime' },
-            { id: 'convert', name: 'cicd convert', desc: 'Translate pipeline formats' },
-            { id: 'doctor', name: 'cicd doctor', desc: 'Check local toolchain health' },
+            { id: 'init', name: 'cicd init', desc: 'Initialize configuration' },
+            { id: 'detect', name: 'cicd detect', desc: 'Auto-scan codebases' },
+            { id: 'generate', name: 'cicd generate', desc: 'Compile pipeline configs' },
+            { id: 'validate', name: 'cicd validate', desc: 'Audit security & graphs' },
+            { id: 'explain', name: 'cicd explain', desc: 'Render workflow cycles' },
+            { id: 'convert', name: 'cicd convert', desc: 'Translate specifications' },
+            { id: 'doctor', name: 'cicd doctor', desc: 'Check local binaries' },
           ].map((cmd) => (
             <button
               key={cmd.id}
@@ -150,7 +200,7 @@ export default function TerminalPlayground() {
           ))}
         </div>
 
-        {/* Terminal Screen */}
+        {/* Terminal Screen (Column 2) */}
         <div className="terminal-window">
           <div className="terminal-window-header">
             <div className="dot-group">
@@ -176,8 +226,47 @@ export default function TerminalPlayground() {
                 </motion.div>
               ))}
             </AnimatePresence>
-            
             <div className="cursor" />
+          </div>
+        </div>
+
+        {/* Documentation / Info Column (Column 3) */}
+        <div className="terminal-info-card">
+          <div className="terminal-info-card-header">
+            <Settings size={18} style={{ color: 'var(--text-secondary)' }} />
+            <span style={{ fontWeight: 700, fontFamily: 'var(--font-mono)', fontSize: '12px' }}>manual reference</span>
+          </div>
+
+          <div className="terminal-info-card-body">
+            <div style={{ marginBottom: '16px' }}>
+              <span className="info-tag-header">USAGE</span>
+              <div className="info-code-block">{commandInfo[selectedCommand].usage}</div>
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <span className="info-tag-header">DESCRIPTION</span>
+              <p className="info-text-paragraph">{commandInfo[selectedCommand].description}</p>
+            </div>
+
+            {commandInfo[selectedCommand].options.length > 0 && (
+              <div>
+                <span className="info-tag-header">OPTIONS</span>
+                <div className="info-options-list">
+                  {commandInfo[selectedCommand].options.map((opt, i) => (
+                    <div key={i} className="info-option-item">{opt}</div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Laptop developer illustration decoration */}
+            <div className="terminal-info-decorator">
+              <img 
+                src="/laptop_developer.png" 
+                alt="Developer looking at code schemas" 
+                className="decorator-image"
+              />
+            </div>
           </div>
         </div>
       </div>
