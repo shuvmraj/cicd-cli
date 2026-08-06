@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, Settings } from 'lucide-react';
+import { ChevronRight, Settings, Play, Laptop } from 'lucide-react';
 
 const colors = {
   green: (text) => <span style={{ color: 'var(--color-green)' }}>{text}</span>,
@@ -154,6 +154,16 @@ const commandInfo = {
 export default function TerminalPlayground() {
   const [selectedCommand, setSelectedCommand] = useState('detect');
   const [typedLines, setTypedLines] = useState([]);
+  const [isLidOpen, setIsLidOpen] = useState(false);
+
+  // Trigger MacBook opening transition on click of any command or mounting
+  useEffect(() => {
+    // Open lid if closed
+    const timer = setTimeout(() => {
+      setIsLidOpen(true);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     setTypedLines([]);
@@ -169,6 +179,15 @@ export default function TerminalPlayground() {
 
     return () => timers.forEach(clearTimeout);
   }, [selectedCommand]);
+
+  const handleCommandChange = (cmdId) => {
+    setSelectedCommand(cmdId);
+    // Give a nice close-and-open flap effect if user clicks
+    setIsLidOpen(false);
+    setTimeout(() => {
+      setIsLidOpen(true);
+    }, 400);
+  };
 
   return (
     <section id="terminal" className="terminal-section">
@@ -188,7 +207,7 @@ export default function TerminalPlayground() {
           ].map((cmd) => (
             <button
               key={cmd.id}
-              onClick={() => setSelectedCommand(cmd.id)}
+              onClick={() => handleCommandChange(cmd.id)}
               className={`cmd-btn ${selectedCommand === cmd.id ? 'active' : ''}`}
             >
               <div>
@@ -200,33 +219,48 @@ export default function TerminalPlayground() {
           ))}
         </div>
 
-        {/* Terminal Screen (Column 2) */}
-        <div className="terminal-window">
-          <div className="terminal-window-header">
-            <div className="dot-group">
-              <div className="dot red" />
-              <div className="dot yellow" />
-              <div className="dot green" />
+        {/* 3D CSS MacBook Terminal Container (Column 2) */}
+        <div className="macbook-wrapper">
+          <div className="macbook-device">
+            {/* Display screen lid */}
+            <div className={`macbook-lid ${isLidOpen ? 'open' : ''}`}>
+              <div className="macbook-screen">
+                <div className="terminal-window-body" style={{ height: '100%', border: 'none', background: 'transparent', padding: '10px' }}>
+                  <AnimatePresence mode="popLayout">
+                    {typedLines.map((line, idx) => (
+                      <motion.div 
+                        key={idx}
+                        initial={{ opacity: 0, x: -3 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.1 }}
+                        style={{ minHeight: '18px', fontSize: '11px' }}
+                      >
+                        {line}
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                  <div className="cursor" style={{ height: '12px' }} />
+                </div>
+              </div>
+              <div className="macbook-logo">macbook</div>
             </div>
-            <span className="terminal-header-title">bash - shubhams-macbook-air</span>
-            <div style={{ width: '40px' }} />
-          </div>
 
-          <div className="terminal-window-body">
-            <AnimatePresence mode="popLayout">
-              {typedLines.map((line, idx) => (
-                <motion.div 
-                  key={idx}
-                  initial={{ opacity: 0, x: -3 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.1 }}
-                  style={{ minHeight: '20px' }}
-                >
-                  {line}
-                </motion.div>
-              ))}
-            </AnimatePresence>
-            <div className="cursor" />
+            {/* Laptop lower base keyboard plate */}
+            <div className="macbook-base">
+              <div className="macbook-notch" />
+              <div className="macbook-trackpad" />
+            </div>
+            
+            {/* Lid Toggle Play button */}
+            <button 
+              onClick={() => setIsLidOpen(prev => !prev)}
+              className="btn-theme" 
+              style={{ marginTop: '20px', width: 'auto', padding: '4px 12px', fontSize: '11px', display: 'flex', gap: '6px', alignItems: 'center' }}
+              title="Toggle MacBook Screen Lid"
+            >
+              <Laptop size={12} />
+              {isLidOpen ? 'Close Lid' : 'Open Lid'}
+            </button>
           </div>
         </div>
 
@@ -237,7 +271,6 @@ export default function TerminalPlayground() {
             <span style={{ fontWeight: 700, fontFamily: 'var(--font-mono)', fontSize: '12px' }}>manual reference</span>
           </div>
 
-          {/* Explicit color style `#f8fafc` added to info-code-block so text is clearly visible on dark background */}
           <div className="terminal-info-card-body">
             <div style={{ marginBottom: '16px' }}>
               <span className="info-tag-header">USAGE</span>

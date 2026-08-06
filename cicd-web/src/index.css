@@ -1211,3 +1211,98 @@ a:hover {
   border-radius: 8px;
   display: block;
 }
+
+/* 3D Macbook Layout */
+.macbook-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  perspective: 1500px;
+  width: 100%;
+}
+
+.macbook-device {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.macbook-lid {
+  position: relative;
+  width: 90%;
+  aspect-ratio: 16/10;
+  background: #18181b;
+  border: 10px solid #09090b;
+  border-bottom-width: 16px;
+  border-radius: 12px 12px 0 0;
+  transform-origin: bottom;
+  transform: rotateX(-95deg); /* Closed state */
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  z-index: 2;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+}
+.macbook-lid.open {
+  transform: rotateX(0deg); /* Open state */
+}
+
+.macbook-screen {
+  width: 100%;
+  height: 100%;
+  background: #040508;
+  padding: 8px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.macbook-logo {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 7px;
+  color: #3f3f46;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.macbook-base {
+  position: relative;
+  width: 100%;
+  height: 10px;
+  background: linear-gradient(to bottom, #71717a, #3f3f46);
+  border-radius: 0 0 16px 16px;
+  border-top: 1.5px solid #a1a1aa;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+  z-index: 1;
+}
+.dark-theme .macbook-base {
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+}
+
+.macbook-notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 3px;
+  background: #18181b;
+  border-radius: 0 0 3px 3px;
+}
+
+.macbook-trackpad {
+  position: absolute;
+  bottom: 1.5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  border: 0.5px solid #52525b;
+  border-radius: 2px;
+  background: #3f3f46;
+}
