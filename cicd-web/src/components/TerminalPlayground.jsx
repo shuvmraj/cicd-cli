@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, Environment } from '@react-three/drei';
 import * as THREE from 'three';
 import Macbook3D from './Macbook3D';
 
+// Colors configured as HTML string templates to prevent [object Object] serialization bugs
 const colors = {
-  green: (text) => <span style={{ color: 'var(--color-green)' }}>{text}</span>,
-  cyan: (text) => <span style={{ color: 'var(--color-cyan)' }}>{text}</span>,
-  yellow: (text) => <span style={{ color: 'var(--color-orange)' }}>{text}</span>,
-  red: (text) => <span style={{ color: 'var(--color-red)' }}>{text}</span>,
-  bold: (text) => <span style={{ fontWeight: 700, color: '#fff' }}>{text}</span>,
+  green: (text) => `<span style="color: var(--color-green)">${text}</span>`,
+  cyan: (text) => `<span style="color: var(--color-cyan)">${text}</span>`,
+  yellow: (text) => `<span style="color: var(--color-orange)">${text}</span>`,
+  red: (text) => `<span style="color: var(--color-red)">${text}</span>`,
+  bold: (text) => `<span style="font-weight: 700; color: #fff">${text}</span>`,
 };
 
 const terminalOutputs = {
@@ -135,8 +136,8 @@ function SceneGroup({ animPhase, children }) {
 
   // Target 3D coordinates based on current loading phase
   const targetY = animPhase === 'closed' ? Math.PI : 0;
-  const targetX = (animPhase === 'closed' || animPhase === 'revolving') ? Math.PI / 6 : 0;
-  const targetScale = (animPhase === 'closed' || animPhase === 'revolving') ? 0.8 : 1.05;
+  const targetX = (animPhase === 'closed' || animPhase === 'revolving') ? Math.PI / 6 : 0.05;
+  const targetScale = (animPhase === 'closed' || animPhase === 'revolving') ? 0.72 : 0.95;
 
   useFrame((state) => {
     if (!groupRef.current) return;
@@ -150,7 +151,7 @@ function SceneGroup({ animPhase, children }) {
   });
 
   return (
-    <group ref={groupRef} position={[0, -0.22, 0]}>
+    <group ref={groupRef} position={[0, -0.32, 0]}>
       {children}
     </group>
   );
@@ -252,8 +253,6 @@ export default function TerminalPlayground() {
     setShowNotification(false);
   };
 
-  const isLidOpen = animPhase === 'opening' || animPhase === 'ready';
-
   return (
     <section ref={sectionRef} id="terminal" className="terminal-section">
       <h2 className="section-title" style={{ marginBottom: '48px' }}>Command Reference Console</h2>
@@ -262,10 +261,11 @@ export default function TerminalPlayground() {
         {/* Real 3D WebGL MacBook Canvas Container */}
         <div className="macbook-3d-canvas-container" style={{ width: '100%', maxWidth: '960px', height: '560px', position: 'relative' }}>
           
-          <Canvas camera={{ position: [0, 0.45, 1.8], fov: 42 }}>
-            <ambientLight intensity={1.5} />
-            <directionalLight position={[8, 12, 5]} intensity={1.5} castShadow />
-            <pointLight position={[-8, 6, -5]} intensity={0.6} />
+          <Canvas camera={{ position: [0, 0.35, 1.7], fov: 42 }}>
+            {/* Bright environment illumination */}
+            <ambientLight intensity={0.9} />
+            <directionalLight position={[10, 15, 6]} intensity={1.8} castShadow />
+            <pointLight position={[-10, 8, -6]} intensity={0.5} />
             
             <Suspense fallback={null}>
               <SceneGroup animPhase={animPhase}>
@@ -371,9 +371,8 @@ export default function TerminalPlayground() {
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ duration: 0.08 }}
                               style={{ minHeight: '14px', marginBottom: '3px' }}
-                            >
-                              {line}
-                            </motion.div>
+                              dangerouslySetInnerHTML={{ __html: line }}
+                            />
                           ))}
                         </AnimatePresence>
                         <div className="cursor" style={{ height: '11px' }} />
@@ -450,6 +449,8 @@ export default function TerminalPlayground() {
                   </div>
                 </Macbook3D>
               </SceneGroup>
+              {/* Studio Environment Map for detailed metallic/aluminum shader highlights */}
+              <Environment preset="studio" />
             </Suspense>
 
             {/* OrbitControls allow drag rotating and panning the 3D model */}

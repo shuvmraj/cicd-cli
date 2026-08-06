@@ -5,7 +5,7 @@ export default function Macbook3D({ children }) {
   const { nodes, materials } = useGLTF('/apple_macbook_pro.glb');
 
   return (
-    <group dispose={null}>
+    <group dispose={null} scale={1.2}>
       {/* 3D Macbook model mesh */}
       <mesh 
         geometry={nodes['macbookpro-material'].geometry} 
@@ -14,18 +14,19 @@ export default function Macbook3D({ children }) {
         userData={{ name: 'macbookpro-material' }}
       />
 
-      {/* HTML Portal screen projected on the 3D model bezel */}
+      {/* HTML Portal screen scaled and positioned to fit inside the model's display bezel */}
       <Html
         transform
         occlude
-        position={[0, 0.408, -0.428]}
-        rotation={[-0.14, 0, 0]} // Fits screen's rear angle tilt
-        distanceFactor={0.53}
+        position={[0, 0.225, -0.265]} // Moved down and forward to align with the bezel
+        rotation={[-0.28, 0, 0]}      // Aligned with physical lid slant
+        distanceFactor={0.315}        // Scaled down to fit within the physical border frame
         style={{
           width: '780px',
           height: '510px',
           background: '#040508',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          borderRadius: '4px'
         }}
       >
         {children}
