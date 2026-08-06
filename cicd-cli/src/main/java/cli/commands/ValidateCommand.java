@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.stream.Stream;
 
+import picocli.CommandLine.Parameters;
+
 /**
  * Subcommand to validate CI/CD pipelines.
  */
@@ -32,11 +34,18 @@ public class ValidateCommand implements Callable<Integer> {
     @Option(names = {"-f", "--file"}, description = "Path to the pipeline file to validate")
     private String pipelineFile;
 
+    @Parameters(index = "0", arity = "0..1", description = "Path to the pipeline file to validate (alternative to -f)")
+    private String pipelineFileParam;
+
     @Option(names = {"-d", "--dir"}, description = "Base directory of the codebase")
     private String baseDir = ".";
 
     @Override
     public Integer call() {
+        if (pipelineFile == null && pipelineFileParam != null) {
+            pipelineFile = pipelineFileParam;
+        }
+
         Path projectPath = Path.of(baseDir).toAbsolutePath().normalize();
         Path pipelinePath = null;
 
