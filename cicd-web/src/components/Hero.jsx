@@ -81,8 +81,9 @@ export default function Hero() {
               </div>
             </div>
 
+            {/* Changed inline style color to #f8fafc (high contrast white) so text is visible on the dark background */}
             <div className="code-box">
-              <span className="code-text" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>{getInstallCmd()}</span>
+              <span className="code-text" style={{ color: '#f8fafc', fontFamily: 'var(--font-mono)' }}>{getInstallCmd()}</span>
               <button 
                 onClick={handleCopy}
                 className="icon-btn"

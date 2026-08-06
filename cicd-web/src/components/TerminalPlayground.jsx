@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, Settings, Info } from 'lucide-react';
+import { ChevronRight, Settings } from 'lucide-react';
 
 const colors = {
   green: (text) => <span style={{ color: 'var(--color-green)' }}>{text}</span>,
@@ -237,10 +237,11 @@ export default function TerminalPlayground() {
             <span style={{ fontWeight: 700, fontFamily: 'var(--font-mono)', fontSize: '12px' }}>manual reference</span>
           </div>
 
+          {/* Explicit color style `#f8fafc` added to info-code-block so text is clearly visible on dark background */}
           <div className="terminal-info-card-body">
             <div style={{ marginBottom: '16px' }}>
               <span className="info-tag-header">USAGE</span>
-              <div className="info-code-block">{commandInfo[selectedCommand].usage}</div>
+              <div className="info-code-block" style={{ color: '#f8fafc', fontFamily: 'var(--font-mono)' }}>{commandInfo[selectedCommand].usage}</div>
             </div>
 
             <div style={{ marginBottom: '16px' }}>
