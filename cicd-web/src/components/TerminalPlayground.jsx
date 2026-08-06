@@ -178,12 +178,12 @@ export default function TerminalPlayground() {
           const readyTimer = setTimeout(() => {
             setAnimPhase('ready');
             setShowNotification(true);
-          }, 2700);
+          }, 2900);
 
           // Phase 4: Auto-dismiss help notification after 7 seconds
           const notifTimer = setTimeout(() => {
             setShowNotification(false);
-          }, 9700);
+          }, 9900);
         }
       },
       { threshold: 0.15 } // Trigger when 15% of the section is visible
