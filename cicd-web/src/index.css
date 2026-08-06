@@ -1330,3 +1330,199 @@ a:hover {
   border-radius: 2px;
   background: #3f3f46;
 }
+
+/* macOS Desktop Environment */
+.macos-desktop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #f43f5e, #7c3aed, #0ea5e9);
+  padding: 0 !important;
+  user-select: none;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.4);
+}
+
+.macos-menubar {
+  height: 22px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  font-size: 10px;
+  font-weight: 500;
+  color: #ffffff;
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.15);
+  z-index: 10;
+}
+.dark-theme .macos-menubar {
+  background: rgba(0, 0, 0, 0.25);
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
+}
+
+.menubar-left, .menubar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.apple-menu-icon {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.menubar-item {
+  cursor: default;
+}
+.menubar-item.active-app {
+  font-weight: 700;
+}
+
+.menubar-right svg {
+  opacity: 0.9;
+}
+
+.live-clock {
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+/* Floating macOS Terminal Window */
+.macos-terminal-window {
+  position: absolute;
+  top: 32px;
+  left: 5%;
+  right: 5%;
+  bottom: 50px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 5;
+}
+
+.macos-terminal-header {
+  height: 24px;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 0 8px;
+}
+
+.macos-dot-group {
+  display: flex;
+  gap: 6px;
+  position: absolute;
+  left: 8px;
+}
+
+.macos-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+.macos-red { background: #ff5f56; }
+.macos-yellow { background: #ffbd2e; }
+.macos-green { background: #27c93f; }
+
+.macos-terminal-title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.macos-terminal-body {
+  flex-grow: 1;
+  padding: 12px;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #e2e8f0;
+  text-align: left;
+  line-height: 1.35;
+}
+
+/* macOS Dock */
+.macos-dock-wrapper {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  width: auto;
+}
+
+.macos-dock {
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 0.5px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 4px 6px;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+.dark-theme .macos-dock {
+  background: rgba(0, 0, 0, 0.35);
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+}
+
+.dock-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.2s;
+  cursor: default;
+}
+.dock-item:hover {
+  transform: scale(1.15) translateY(-3px);
+}
+
+.dock-svg {
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  display: block;
+}
+
+.terminal-dock-icon {
+  width: 24px;
+  height: 24px;
+  background: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #10b981;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.active-dot {
+  width: 3px;
+  height: 3px;
+  background: #ffffff;
+  border-radius: 50%;
+  margin-top: 2px;
+  opacity: 0.9;
+}

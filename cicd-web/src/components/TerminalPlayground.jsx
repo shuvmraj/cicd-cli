@@ -119,9 +119,29 @@ const terminalOutputs = {
 export default function TerminalPlayground() {
   const [selectedCommand, setSelectedCommand] = useState('detect');
   const [typedLines, setTypedLines] = useState([]);
-  
-  // Animation phases: 'closed' -> 'revolving' -> 'opening' -> 'ready'
   const [animPhase, setAnimPhase] = useState('closed');
+  const [timeStr, setTimeStr] = useState('');
+
+  // Update menu bar clock dynamically with correct live date/time format
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const day = days[now.getDay()];
+      const month = months[now.getMonth()];
+      const date = now.getDate();
+      let hours = now.getHours();
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      setTimeStr(`${day} ${month} ${date} ${hours}:${minutes} ${ampm}`);
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Trigger Apple MacBook intro sequence on mount
   useEffect(() => {
@@ -210,13 +230,13 @@ export default function TerminalPlayground() {
           ))}
         </div>
 
-        {/* 3D CSS MacBook Terminal Container (Column 2) - Expanded to Max Width */}
+        {/* 3D CSS MacBook Container (Column 2) - Expanded to Max Width with macOS Desktop */}
         <div className="macbook-wrapper">
           <div className="macbook-device" style={getDeviceStyle()}>
             {/* Display screen lid */}
             <div className={`macbook-lid ${isLidOpen ? 'open' : ''}`}>
               
-              {/* Outer Lid panel (Apple outline logo) - visible when screen is closed */}
+              {/* Outer Lid cover (Apple outline logo) - visible when screen is closed */}
               {!isLidOpen && (
                 <div className="macbook-lid-back">
                   <svg 
@@ -228,24 +248,104 @@ export default function TerminalPlayground() {
                 </div>
               )}
 
-              {/* Inner Display (Terminal output screen) */}
+              {/* Inner macOS Desktop Display */}
               {isLidOpen && (
-                <div className="macbook-screen">
-                  <div className="terminal-window-body" style={{ height: '100%', border: 'none', background: 'transparent', padding: '12px' }}>
-                    <AnimatePresence mode="popLayout">
-                      {typedLines.map((line, idx) => (
-                        <motion.div 
-                          key={idx}
-                          initial={{ opacity: 0, x: -3 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.1 }}
-                          style={{ minHeight: '18px', fontSize: '11px' }}
-                        >
-                          {line}
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                    <div className="cursor" style={{ height: '12px' }} />
+                <div className="macbook-screen macos-desktop">
+                  {/* macOS Menu bar */}
+                  <div className="macos-menubar">
+                    <div className="menubar-left">
+                      <span className="apple-menu-icon"></span>
+                      <span className="menubar-item active-app">Terminal</span>
+                      <span className="menubar-item">File</span>
+                      <span className="menubar-item">Edit</span>
+                      <span className="menubar-item">View</span>
+                      <span className="menubar-item">Go</span>
+                      <span className="menubar-item">Help</span>
+                    </div>
+                    <div className="menubar-right">
+                      {/* Wifi icon */}
+                      <svg width="10" height="10" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M15.384 6.115a.485.485 0 0 0-.047-.736A12.444 12.444 0 0 0 8 3 12.44 12.44 0 0 0 .663 5.379a.485.485 0 0 0-.048.736l.518.518a.48.48 0 0 0 .634.027A10.457 10.457 0 0 1 8 4.768a10.457 10.457 0 0 1 6.233 1.892.48.48 0 0 0 .634-.027l.517-.518z"/>
+                        <path d="M12.553 8.946a.486.486 0 0 0-.02-.705A8.455 8.455 0 0 0 8 6.556a8.453 8.453 0 0 0-4.533 1.685.486.486 0 0 0-.02.705l.518.518a.48.48 0 0 0 .647.018A6.47 6.47 0 0 1 8 8.136a6.47 6.47 0 0 1 3.388 1.346.48.48 0 0 0 .647-.018l.518-.518z"/>
+                        <path d="M9.73 11.77a.486.486 0 0 0 .007-.677A4.475 4.475 0 0 0 8 10.106a4.475 4.475 0 0 0-1.737.987.486.486 0 0 0 .007.677l.518.518a.48.48 0 0 0 .673-.01A2.488 2.488 0 0 1 8 11.666a2.488 2.488 0 0 1 .539.613.48.48 0 0 0 .673.01l.518-.519zm-2.4 1.63a.5.5 0 0 0 0 .707l.67.67a.5.5 0 0 0 .707 0l.67-.67a.5.5 0 0 0 0-.707l-.67-.67a.5.5 0 0 0-.707 0l-.67.67z"/>
+                      </svg>
+                      {/* Battery icon */}
+                      <svg width="12" height="10" viewBox="0 0 16 16" fill="currentColor">
+                        <rect x="1" y="4" width="12" height="8" rx="1" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                        <path d="M14 6h1v4h-1z" />
+                        <rect x="3" y="6" width="8" height="4" fill="currentColor" />
+                      </svg>
+                      <span className="live-clock">{timeStr}</span>
+                    </div>
+                  </div>
+
+                  {/* Floating macOS Terminal App Window */}
+                  <div className="macos-terminal-window">
+                    <div className="macos-terminal-header">
+                      <div className="macos-dot-group">
+                        <div className="macos-dot macos-red" />
+                        <div className="macos-dot macos-yellow" />
+                        <div className="macos-dot macos-green" />
+                      </div>
+                      <span className="macos-terminal-title">shubhams — cicd-cli — 80×24</span>
+                    </div>
+                    <div className="macos-terminal-body">
+                      <AnimatePresence mode="popLayout">
+                        {typedLines.map((line, idx) => (
+                          <motion.div 
+                            key={idx}
+                            initial={{ opacity: 0, x: -2 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.08 }}
+                            style={{ minHeight: '14px', marginBottom: '3px' }}
+                          >
+                            {line}
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
+                      <div className="cursor" style={{ height: '11px' }} />
+                    </div>
+                  </div>
+
+                  {/* macOS Dock at bottom */}
+                  <div className="macos-dock-wrapper">
+                    <div className="macos-dock">
+                      {/* Finder icon */}
+                      <div className="dock-item">
+                        <svg className="dock-svg" viewBox="0 0 64 64">
+                          <rect width="64" height="64" rx="14" fill="#38bdf8" />
+                          <path d="M12 20c8 0 10 8 20 8s12-8 20-8v24c-8 0-10 6-20 6s-12-6-20-6V20z" fill="#0284c7" />
+                          <circle cx="22" cy="34" r="3" fill="#fff" />
+                          <circle cx="42" cy="34" r="3" fill="#fff" />
+                          <path d="M26 44c4 4 8 4 12 0" stroke="#fff" strokeWidth="3" strokeLinecap="round" fill="none" />
+                        </svg>
+                      </div>
+                      {/* Safari Compass */}
+                      <div className="dock-item">
+                        <svg className="dock-svg" viewBox="0 0 64 64">
+                          <circle cx="32" cy="32" r="28" fill="#0ea5e9" />
+                          <circle cx="32" cy="32" r="24" fill="#fff" />
+                          <path d="M44 20 l-18 8 l-6 16 l 18 -8 z" fill="#ef4444" />
+                          <path d="M20 44 l 18 -8 l 6 -16 l -18 8 z" fill="#3b82f6" />
+                          <circle cx="32" cy="32" r="3" fill="#fff" />
+                        </svg>
+                      </div>
+                      {/* System Preferences Cog */}
+                      <div className="dock-item">
+                        <svg className="dock-svg" viewBox="0 0 64 64">
+                          <rect width="64" height="64" rx="14" fill="#94a3b8" />
+                          <circle cx="32" cy="32" r="12" fill="#475569" />
+                          <path d="M32 12 l3 6 l6 -3 l-3 6 l6 3 l-6 3 l3 6 l-6 -3 l-3 6 l-3 -6 l-6 3 l3 -6 l-6 -3 l6 -3 l-3 -6 l6 3 z" fill="#e2e8f0" />
+                        </svg>
+                      </div>
+                      {/* Active Terminal App icon with indicator dot */}
+                      <div className="dock-item active">
+                        <div className="terminal-dock-icon">
+                          <span>&gt;_</span>
+                        </div>
+                        <div className="active-dot" />
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
