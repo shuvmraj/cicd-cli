@@ -1076,25 +1076,200 @@ a:hover {
   width: 100%;
 }
 
-.image-card-container {
+/* Interactive Pipeline Sandbox Card */
+.pipeline-sandbox-card {
   width: 100%;
-  max-width: 440px;
-  border-radius: 16px;
-  border: 1px solid var(--border-color);
-  padding: 8px;
+  max-width: 480px;
   background: var(--bg-card);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
-  overflow: hidden;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
-.dark-theme .image-card-container {
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+.dark-theme .pipeline-sandbox-card {
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
 }
 
-.tech-illustration {
-  width: 100%;
-  height: auto;
+.sandbox-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 12px;
+}
+
+.sandbox-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary);
+}
+
+.header-icon {
+  color: var(--color-cyan);
+}
+
+.sandbox-title {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.sandbox-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 100px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-green);
+}
+
+.sandbox-options-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.option-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.option-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+.option-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: default;
+  transition: all 0.15s ease-out;
+}
+.chip-btn:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--text-muted);
+}
+.chip-btn.active {
+  background: var(--glow-cyan);
+  border-color: var(--color-cyan);
+  color: var(--color-cyan);
+  box-shadow: 0 0 10px rgba(6, 182, 212, 0.15);
+}
+
+/* Flow Chart Nodes */
+.pipeline-flow-chart {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--bg-deep);
+  border: 1px dashed var(--border-color);
   border-radius: 10px;
-  display: block;
+}
+
+.flow-node {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.flow-arrow-dashed {
+  flex-grow: 1;
+  height: 1px;
+  border-top: 1px dashed var(--text-muted);
+  margin: 0 8px;
+  opacity: 0.5;
+}
+
+/* Editor Codebox */
+.sandbox-editor-box {
+  border-radius: 10px;
+  background: #09090b;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  text-align: left;
+}
+
+.editor-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.editor-file-name {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: #a1a1aa;
+}
+
+.editor-copy-btn {
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9px;
+  color: #a1a1aa;
+  cursor: default;
+}
+.editor-copy-btn:hover {
+  color: #ffffff;
+}
+
+.editor-code-block {
+  margin: 0;
+  padding: 12px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  line-height: 1.4;
+  color: #e4e4e7;
+  overflow-x: auto;
+  max-height: 130px;
+  text-align: left;
+}
+
+.sandbox-footer {
+  text-align: left;
+  border-top: 1px solid var(--border-color);
+  padding-top: 10px;
+}
+
+.footer-status-text {
+  font-size: 9px;
+  color: var(--text-muted);
 }
 
 @media (max-width: 1023px) {
