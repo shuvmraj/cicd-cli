@@ -230,7 +230,7 @@ export default function TerminalPlayground() {
           ))}
         </div>
 
-        {/* 3D CSS MacBook Container (Column 2) - Expanded to Max Width with macOS Desktop */}
+        {/* 3D CSS MacBook Container (Column 2) - Configured with Catalina Night Wallpaper */}
         <div className="macbook-wrapper">
           <div className="macbook-device" style={getDeviceStyle()}>
             {/* Display screen lid */}
@@ -250,7 +250,14 @@ export default function TerminalPlayground() {
 
               {/* Inner macOS Desktop Display */}
               {isLidOpen && (
-                <div className="macbook-screen macos-desktop">
+                <div 
+                  className="macbook-screen macos-desktop"
+                  style={{
+                    backgroundImage: 'url(https://raw.githubusercontent.com/Mach-OS/wallpapers/master/catalina-night.jpg)',
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center'
+                  }}
+                >
                   {/* macOS Menu bar */}
                   <div className="macos-menubar">
                     <div className="menubar-left">
@@ -310,35 +317,66 @@ export default function TerminalPlayground() {
                   {/* macOS Dock at bottom */}
                   <div className="macos-dock-wrapper">
                     <div className="macos-dock">
-                      {/* Finder icon */}
+                      {/* Real Finder icon (High fidelity Vector) */}
                       <div className="dock-item">
-                        <svg className="dock-svg" viewBox="0 0 64 64">
-                          <rect width="64" height="64" rx="14" fill="#38bdf8" />
-                          <path d="M12 20c8 0 10 8 20 8s12-8 20-8v24c-8 0-10 6-20 6s-12-6-20-6V20z" fill="#0284c7" />
-                          <circle cx="22" cy="34" r="3" fill="#fff" />
-                          <circle cx="42" cy="34" r="3" fill="#fff" />
-                          <path d="M26 44c4 4 8 4 12 0" stroke="#fff" strokeWidth="3" strokeLinecap="round" fill="none" />
+                        <svg className="dock-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect width="64" height="64" rx="14" fill="url(#finderGrad)" />
+                          <path d="M32 6C17.64 6 6 17.64 6 32c0 14.36 11.64 26 26 26c1.64 0 3.25-.15 4.81-.44V34.56H16.48v-4.88H36.8V6.44C35.25 6.15 33.64 6 32 6z" fill="#58A6FF" />
+                          <path d="M32 6c14.36 0 26 11.64 26 26c0 14.36-11.64 26-26 26c-1.64 0-3.25-.15-4.81-.44V34.56h20.32v-4.88H27.2V6.44C28.75 6.15 30.36 6 32 6z" fill="#0A84FF" />
+                          <path d="M22 28a2.5 2.5 0 100-5 2.5 2.5 0 000 5zm20 0a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" fill="#1C1C1E" />
+                          <path d="M27.2 6.44v23.24H36.8v4.88H16.48v9.42c2.4 4.54 6.74 7.84 11.89 8.84v-9.38h7.24a4.4 4.4 0 004.4-4.4v-4.52" stroke="#1C1C1E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                          <path d="M25 43.5c3.5 3.5 10.5 3.5 14 0" stroke="#1C1C1E" strokeWidth="3" strokeLinecap="round" />
+                          <defs>
+                            <linearGradient id="finderGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+                              <stop stopColor="#E5F1FF" />
+                              <stop offset="1" stopColor="#A8D1FF" />
+                            </linearGradient>
+                          </defs>
                         </svg>
                       </div>
-                      {/* Safari Compass */}
+                      {/* Real Safari compass icon */}
                       <div className="dock-item">
-                        <svg className="dock-svg" viewBox="0 0 64 64">
-                          <circle cx="32" cy="32" r="28" fill="#0ea5e9" />
-                          <circle cx="32" cy="32" r="24" fill="#fff" />
-                          <path d="M44 20 l-18 8 l-6 16 l 18 -8 z" fill="#ef4444" />
-                          <path d="M20 44 l 18 -8 l 6 -16 l -18 8 z" fill="#3b82f6" />
-                          <circle cx="32" cy="32" r="3" fill="#fff" />
+                        <svg className="dock-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="32" cy="32" r="28" fill="url(#safariSky)" />
+                          <circle cx="32" cy="32" r="23" stroke="rgba(255,255,255,0.4)" strokeWidth="1" />
+                          <path d="M32 8A24 24 0 1056 32 24.03 24.03 0 0032 8zm0 45a21 21 0 1121-21 21.02 21.02 0 01-21 21z" fill="url(#safariRing)" />
+                          {/* Needle */}
+                          <path d="M43.5 20.5l-16.2 8.7 4.7 4.7 11.5-13.4z" fill="#FF453A" />
+                          <path d="M20.5 43.5l16.2-8.7-4.7-4.7-11.5 13.4z" fill="#F2F2F7" />
+                          <circle cx="32" cy="32" r="2.5" fill="#FFD60A" />
+                          {/* Dial markers */}
+                          <path d="M32 9v2M32 53v2M9 32h2M53 32h2" stroke="rgba(255,255,255,0.8)" strokeWidth="1.5" strokeLinecap="round" />
+                          <defs>
+                            <linearGradient id="safariSky" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+                              <stop stopColor="#0A84FF" />
+                              <stop offset="1" stopColor="#0055B3" />
+                            </linearGradient>
+                            <linearGradient id="safariRing" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+                              <stop stopColor="#FFD60A" stopOpacity="0.8" />
+                              <stop offset="1" stopColor="#FF453A" stopOpacity="0.8" />
+                            </linearGradient>
+                          </defs>
                         </svg>
                       </div>
-                      {/* System Preferences Cog */}
+                      {/* Real System Preferences icon */}
                       <div className="dock-item">
-                        <svg className="dock-svg" viewBox="0 0 64 64">
-                          <rect width="64" height="64" rx="14" fill="#94a3b8" />
-                          <circle cx="32" cy="32" r="12" fill="#475569" />
-                          <path d="M32 12 l3 6 l6 -3 l-3 6 l6 3 l-6 3 l3 6 l-6 -3 l-3 6 l-3 -6 l-6 3 l3 -6 l-6 -3 l6 -3 l-3 -6 l6 3 z" fill="#e2e8f0" />
+                        <svg className="dock-svg" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <rect width="64" height="64" rx="14" fill="url(#settingsMetal)" />
+                          <circle cx="32" cy="32" r="14" fill="#8E8E93" stroke="#AEAEB2" strokeWidth="1.5" />
+                          {/* Inner gear */}
+                          <circle cx="32" cy="32" r="8" fill="#D1D1D6" />
+                          {/* Cog teeth */}
+                          <path d="M32 14v4M32 46v4M14 32h4M46 32h4M19.3 19.3l2.8 2.8M41.9 41.9l2.8 2.8M19.3 44.7l2.8-2.8M41.9 22.1l2.8-2.8" stroke="#AEAEB2" strokeWidth="3" strokeLinecap="round" />
+                          <circle cx="32" cy="32" r="4" fill="#505054" />
+                          <defs>
+                            <linearGradient id="settingsMetal" x1="0" y1="0" x2="0" y2="64" gradientUnits="userSpaceOnUse">
+                              <stop stopColor="#F2F2F7" />
+                              <stop offset="1" stopColor="#C7C7CC" />
+                            </linearGradient>
+                          </defs>
                         </svg>
                       </div>
-                      {/* Active Terminal App icon with indicator dot */}
+                      {/* Real Terminal App icon with active status dot */}
                       <div className="dock-item active">
                         <div className="terminal-dock-icon">
                           <span>&gt;_</span>
