@@ -55,13 +55,13 @@ export default function App() {
       <Features theme={theme} />
 
       {/* Command playground terminal simulator */}
-      <TerminalPlayground />
+      <TerminalPlayground theme={theme} />
 
       {/* Codebase Stack Explorer templates */}
       <StackExplorer theme={theme} />
 
       {/* Rule engine live audit sandbox */}
-      <RuleSandbox />
+      <RuleSandbox theme={theme} />
 
       {/* Footer details */}
       <Footer />

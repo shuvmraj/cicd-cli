@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Play, AlertCircle, RefreshCw, AlertTriangle, Info } from 'lucide-react';
+import ScanGrid from './ScanGrid';
 
-export default function RuleSandbox() {
+export default function RuleSandbox({ theme }) {
   const [isScanning, setIsScanning] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
   const [scanStepText, setScanStepText] = useState('');
@@ -69,11 +70,14 @@ jobs:
   };
 
   return (
-    <section id="sandbox" className="sandbox-section">
+    <section id="sandbox" className="sandbox-section" style={{ position: 'relative', overflow: 'hidden' }}>
       <div className="sandbox-glow-left" />
       <div className="sandbox-glow-right" />
+      <ScanGrid theme={theme} />
+      
       <motion.h2 
         className="section-title"
+        style={{ position: 'relative', zIndex: 2 }}
         initial={{ opacity: 0, y: 15 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
@@ -84,6 +88,7 @@ jobs:
 
       <motion.div 
         className="sandbox-grid"
+        style={{ position: 'relative', zIndex: 2 }}
         initial={{ opacity: 0, y: 32 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-120px" }}

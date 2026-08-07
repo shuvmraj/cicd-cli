@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import DataStreams from './DataStreams';
 
 // Colors configured as HTML string templates to prevent [object Object] serialization bugs
 const colors = {
@@ -126,7 +127,7 @@ const desktopShortcuts = [
   { id: 'doctor', name: 'doctor.sh', icon: '🩺' },
 ];
 
-export default function TerminalPlayground() {
+export default function TerminalPlayground({ theme }) {
   const [selectedCommand, setSelectedCommand] = useState('detect');
   const [typedLines, setTypedLines] = useState([]);
   const [timeStr, setTimeStr] = useState('');
@@ -183,11 +184,12 @@ export default function TerminalPlayground() {
   };
 
   return (
-    <section id="terminal" className="terminal-section">
+    <section id="terminal" className="terminal-section" style={{ position: 'relative', overflow: 'hidden' }}>
       <div className="terminal-glow-bg" />
+      <DataStreams theme={theme} />
       <motion.h2 
         className="section-title" 
-        style={{ marginBottom: '48px' }}
+        style={{ marginBottom: '48px', position: 'relative', zIndex: 2 }}
         initial={{ opacity: 0, y: 15 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
@@ -198,7 +200,7 @@ export default function TerminalPlayground() {
       
       <motion.div 
         className="terminal-playground-layout" 
-        style={{ justifyContent: 'center' }}
+        style={{ justifyContent: 'center', position: 'relative', zIndex: 2 }}
         initial={{ opacity: 0, y: 32 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-120px" }}
