@@ -72,8 +72,6 @@ export default function Hero() {
   return (
     <section className="hero-section center-hero">
       <div className="hero-content-centered">
-        {/* Glow pill badge */}
-        <div className="badge-cyan" style={{ margin: '0 auto 24px' }}>v1.2.0-stable</div>
         
         {/* Main Minimal Headline */}
         <motion.h1 
