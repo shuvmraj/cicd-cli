@@ -3,7 +3,7 @@ import Lenis from 'lenis';
 
 // Modular Components
 import ReactBitsBg from './components/ReactBitsBg';
-import Prism from './components/Prism';
+import DotGrid from './components/DotGrid';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import Features from './components/Features';
@@ -41,21 +41,21 @@ export default function App() {
 
   return (
     <div className={`app-container ${theme === 'dark' ? 'dark-theme' : ''}`}>
-      {/* Background switcher: Grid on light, animated Prism shader on dark */}
+      {/* Background switcher: Grid on light, interactive DotGrid on dark */}
       {theme === 'light' ? (
         <ReactBitsBg theme={theme} />
       ) : (
         <div style={{ position: 'fixed', inset: 0, width: '100%', height: '100%', zIndex: 0, pointerEvents: 'none', overflow: 'hidden' }}>
-          <Prism
-            animationType="rotate"
-            timeScale={0.5}
-            height={3.5}
-            baseWidth={5.5}
-            scale={3.6}
-            hueShift={0}
-            colorFrequency={1}
-            noise={0}
-            glow={1}
+          <DotGrid
+            dotSize={5}
+            gap={15}
+            baseColor="#2F293A"
+            activeColor="#5227FF"
+            proximity={120}
+            shockRadius={250}
+            shockStrength={5}
+            resistance={750}
+            returnDuration={1.5}
           />
         </div>
       )}
