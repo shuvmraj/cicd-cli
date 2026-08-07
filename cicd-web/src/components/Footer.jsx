@@ -3,7 +3,7 @@ import React from 'react';
 export default function Footer() {
   return (
     <footer className="app-footer">
-      <span>© 2026 cicd-cli. </span>
+      <span>© 2026 </span>
       <span>
         Designed & developed by{' '}
         <a 
@@ -15,7 +15,6 @@ export default function Footer() {
           shuvmraj
         </a>
       </span>
-      <span>Built with Java 21 & React Vite</span>
     </footer>
   );
 }
