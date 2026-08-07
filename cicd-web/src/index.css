@@ -73,9 +73,8 @@ body {
 }
 
 .dark-theme body {
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1.2px, transparent 1.2px);
+  background-size: 28px 28px;
 }
 
 * {
@@ -137,11 +136,26 @@ a:hover {
 
 /* Glow Blobs */
 .bg-glow-purple {
-  display: none !important;
+  display: none;
 }
 
 .bg-glow-cyan {
-  display: none !important;
+  display: none;
+}
+
+/* Blurred side accent glow in Dark Theme */
+.dark-theme .bg-glow-purple {
+  display: block !important;
+  position: absolute;
+  top: -50px;
+  right: -100px;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.12) 0%, rgba(168, 85, 247, 0.03) 60%, transparent 100%);
+  filter: blur(120px);
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* Header & Nav */
