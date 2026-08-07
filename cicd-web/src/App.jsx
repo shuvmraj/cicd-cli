@@ -9,6 +9,7 @@ import Hero from './components/Hero';
 import Features from './components/Features';
 import TerminalPlayground from './components/TerminalPlayground';
 import StackExplorer from './components/StackExplorer';
+import Documentation from './components/Documentation';
 import RuleSandbox from './components/RuleSandbox';
 import Footer from './components/Footer';
 
@@ -59,6 +60,9 @@ export default function App() {
 
       {/* Codebase Stack Explorer templates */}
       <StackExplorer theme={theme} />
+
+      {/* Detailed Documentation & Command Reference Directory */}
+      <Documentation theme={theme} />
 
       {/* Rule engine live audit sandbox */}
       <RuleSandbox theme={theme} />
