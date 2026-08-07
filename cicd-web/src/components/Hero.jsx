@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Terminal, Clipboard, Check, HelpCircle } from 'lucide-react';
+import ReactBitsBg from './ReactBitsBg';
+import DotGrid from './DotGrid';
 
 const cmdDemos = {
   detect: {
@@ -29,7 +31,7 @@ const cmdDemos = {
   }
 };
 
-export default function Hero() {
+export default function Hero({ theme }) {
   const [installOs, setInstallOs] = useState('mac');
   const [copied, setCopied] = useState(false);
   const [activeMode, setActiveMode] = useState('install'); // 'install' or 'demo'
@@ -71,7 +73,39 @@ export default function Hero() {
 
   return (
     <section className="hero-section center-hero">
-      <div className="hero-content-centered">
+      {/* Localized background for Hero section only */}
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '100vw',
+        height: '100%',
+        zIndex: 1,
+        pointerEvents: 'none',
+        overflow: 'hidden',
+        maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)',
+        WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)',
+        opacity: theme === 'dark' ? 0.35 : 0.8,
+      }}>
+        {theme === 'light' ? (
+          <ReactBitsBg theme={theme} />
+        ) : (
+          <DotGrid
+            dotSize={5}
+            gap={15}
+            baseColor="#2F293A"
+            activeColor="#5227FF"
+            proximity={120}
+            shockRadius={250}
+            shockStrength={5}
+            resistance={750}
+            returnDuration={1.5}
+          />
+        )}
+      </div>
+
+      <div className="hero-content-centered" style={{ position: 'relative', zIndex: 2 }}>
         
         {/* Main Minimal Headline */}
         <motion.h1 

@@ -41,25 +41,6 @@ export default function App() {
 
   return (
     <div className={`app-container ${theme === 'dark' ? 'dark-theme' : ''}`}>
-      {/* Background switcher: Grid on light, interactive DotGrid on dark */}
-      {theme === 'light' ? (
-        <ReactBitsBg theme={theme} />
-      ) : (
-        <div style={{ position: 'fixed', inset: 0, width: '100%', height: '100%', zIndex: 0, pointerEvents: 'none', overflow: 'hidden' }}>
-          <DotGrid
-            dotSize={5}
-            gap={15}
-            baseColor="#2F293A"
-            activeColor="#5227FF"
-            proximity={120}
-            shockRadius={250}
-            shockStrength={5}
-            resistance={750}
-            returnDuration={1.5}
-          />
-        </div>
-      )}
-
       {/* Glow ambient blobs */}
       <div className="bg-glow-purple" />
       <div className="bg-glow-cyan" />
@@ -68,7 +49,7 @@ export default function App() {
       <Header theme={theme} toggleTheme={toggleTheme} />
 
       {/* Hero section with Headline and CLI Download widget */}
-      <Hero />
+      <Hero theme={theme} />
 
       {/* Tech features detail display */}
       <Features />
