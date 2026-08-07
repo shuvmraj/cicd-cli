@@ -40,15 +40,20 @@ const techStacks = {
   }
 };
 
-export default function StackExplorer() {
+import MeshWaves from './MeshWaves';
+
+export default function StackExplorer({ theme }) {
   const [selectedStack, setSelectedStack] = useState('react');
   const [activeTab, setActiveTab] = useState('docker');
 
   return (
-    <section id="explorer" className="explorer-section">
+    <section id="explorer" className="explorer-section" style={{ position: 'relative', overflow: 'hidden' }}>
       <div className="stack-glow-bg" />
+      <MeshWaves theme={theme} />
+      
       <motion.h2 
         className="section-title"
+        style={{ position: 'relative', zIndex: 2 }}
         initial={{ opacity: 0, y: 15 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
@@ -59,6 +64,7 @@ export default function StackExplorer() {
 
       <motion.div 
         className="explorer-grid"
+        style={{ position: 'relative', zIndex: 2 }}
         initial={{ opacity: 0, y: 32 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-120px" }}

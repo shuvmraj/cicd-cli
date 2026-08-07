@@ -52,13 +52,13 @@ export default function App() {
       <Hero theme={theme} />
 
       {/* Tech features detail display */}
-      <Features />
+      <Features theme={theme} />
 
       {/* Command playground terminal simulator */}
       <TerminalPlayground />
 
       {/* Codebase Stack Explorer templates */}
-      <StackExplorer />
+      <StackExplorer theme={theme} />
 
       {/* Rule engine live audit sandbox */}
       <RuleSandbox />

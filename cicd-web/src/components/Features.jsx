@@ -1,12 +1,15 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Cpu, ShieldCheck, FileCode } from 'lucide-react';
+import ParticleNetwork from './ParticleNetwork';
 
-export default function Features() {
+export default function Features({ theme }) {
   return (
-    <section id="features" className="features-section">
+    <section id="features" className="features-section" style={{ position: 'relative', overflow: 'hidden' }}>
+      <ParticleNetwork theme={theme} />
       <motion.h2 
         className="section-title"
+        style={{ position: 'relative', zIndex: 2 }}
         initial={{ opacity: 0, y: 15 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
@@ -17,6 +20,7 @@ export default function Features() {
 
       <motion.div 
         className="features-grid"
+        style={{ position: 'relative', zIndex: 2 }}
         initial={{ opacity: 0, y: 32 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-120px" }}
