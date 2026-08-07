@@ -1,11 +1,27 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Cpu, ShieldCheck, FileCode } from 'lucide-react';
 
 export default function Features() {
   return (
     <section id="features" className="features-section">
-      <h2 className="section-title">Engineered for Security & Speed</h2>
-      <div className="features-grid">
+      <motion.h2 
+        className="section-title"
+        initial={{ opacity: 0, y: 15 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.5 }}
+      >
+        Engineered for Security & Speed
+      </motion.h2>
+
+      <motion.div 
+        className="features-grid"
+        initial={{ opacity: 0, y: 32 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-120px" }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      >
         <div className="feature-card">
           <div className="feature-icon-wrapper">
             <Cpu size={24} />
@@ -35,7 +51,7 @@ export default function Features() {
             Converts existing workflows (GitHub Actions to GitLab CI, Jenkins, or Azure DevOps) by translating script stages natively.
           </p>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

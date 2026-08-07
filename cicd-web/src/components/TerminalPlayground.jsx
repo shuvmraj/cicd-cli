@@ -184,9 +184,25 @@ export default function TerminalPlayground() {
 
   return (
     <section id="terminal" className="terminal-section">
-      <h2 className="section-title" style={{ marginBottom: '48px' }}>Command Reference Console</h2>
+      <motion.h2 
+        className="section-title" 
+        style={{ marginBottom: '48px' }}
+        initial={{ opacity: 0, y: 15 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.5 }}
+      >
+        Command Reference Console
+      </motion.h2>
       
-      <div className="terminal-playground-layout" style={{ justifyContent: 'center' }}>
+      <motion.div 
+        className="terminal-playground-layout" 
+        style={{ justifyContent: 'center' }}
+        initial={{ opacity: 0, y: 32 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-120px" }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      >
         {/* CSS-based Macbook Container - Fully static, flat, and open */}
         <div className="macbook-wrapper" style={{ maxWidth: '1000px', margin: '0 auto', perspective: 'none' }}>
           <div className="macbook-device" style={{ transform: 'none', transition: 'none' }}>
@@ -375,7 +391,7 @@ export default function TerminalPlayground() {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

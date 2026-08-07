@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 
 const techStacks = {
   react: {
@@ -45,8 +46,23 @@ export default function StackExplorer() {
 
   return (
     <section id="explorer" className="explorer-section">
-      <h2 className="section-title">Codebase Template Explorer</h2>
-      <div className="explorer-grid">
+      <motion.h2 
+        className="section-title"
+        initial={{ opacity: 0, y: 15 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.5 }}
+      >
+        Codebase Template Explorer
+      </motion.h2>
+
+      <motion.div 
+        className="explorer-grid"
+        initial={{ opacity: 0, y: 32 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-120px" }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      >
         {/* Stack Buttons */}
         <div className="explorer-sidebar">
           {Object.keys(techStacks).map((stackKey) => (
@@ -94,7 +110,7 @@ export default function StackExplorer() {
             </pre>
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

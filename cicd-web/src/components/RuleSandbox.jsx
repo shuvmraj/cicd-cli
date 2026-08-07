@@ -70,8 +70,23 @@ jobs:
 
   return (
     <section id="sandbox" className="sandbox-section">
-      <h2 className="section-title">Rule Engine Sandbox</h2>
-      <div className="sandbox-grid">
+      <motion.h2 
+        className="section-title"
+        initial={{ opacity: 0, y: 15 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.5 }}
+      >
+        Rule Engine Sandbox
+      </motion.h2>
+
+      <motion.div 
+        className="sandbox-grid"
+        initial={{ opacity: 0, y: 32 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-120px" }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      >
         {/* YAML Editor Panel */}
         <div className="editor-panel">
           <div className="panel-header">
@@ -189,7 +204,7 @@ jobs:
             </motion.div>
           )}
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }
