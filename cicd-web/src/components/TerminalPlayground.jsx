@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import DataStreams from './DataStreams';
 
 // Colors configured as HTML string templates to prevent [object Object] serialization bugs
 const colors = {
@@ -184,12 +183,11 @@ export default function TerminalPlayground({ theme }) {
   };
 
   return (
-    <section id="terminal" className="terminal-section" style={{ position: 'relative', overflow: 'hidden' }}>
+    <section id="terminal" className="terminal-section">
       <div className="terminal-glow-bg" />
-      <DataStreams theme={theme} />
       <motion.h2 
         className="section-title" 
-        style={{ marginBottom: '48px', position: 'relative', zIndex: 2 }}
+        style={{ marginBottom: '48px' }}
         initial={{ opacity: 0, y: 15 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}

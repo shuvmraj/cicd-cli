@@ -228,9 +228,6 @@ export default function Hero({ theme }) {
             )}
           </div>
 
-          <div className="console-footer-bar">
-            <span>Java 21 Engine • MIT Licensed • Zero dependencies</span>
-          </div>
         </motion.div>
       </div>
     </section>
