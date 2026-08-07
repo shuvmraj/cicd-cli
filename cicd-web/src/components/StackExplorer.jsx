@@ -46,6 +46,7 @@ export default function StackExplorer() {
 
   return (
     <section id="explorer" className="explorer-section">
+      <div className="stack-glow-bg" />
       <motion.h2 
         className="section-title"
         initial={{ opacity: 0, y: 15 }}

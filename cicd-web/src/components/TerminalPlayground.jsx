@@ -184,6 +184,7 @@ export default function TerminalPlayground() {
 
   return (
     <section id="terminal" className="terminal-section">
+      <div className="terminal-glow-bg" />
       <motion.h2 
         className="section-title" 
         style={{ marginBottom: '48px' }}

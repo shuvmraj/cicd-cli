@@ -1817,3 +1817,86 @@ a:hover {
   color: #e4e4e7 !important;
   text-shadow: none;
 }
+
+/* Localized Section Glow Backdrops for Dark Mode */
+.terminal-section {
+  position: relative;
+  overflow: visible;
+}
+.terminal-glow-bg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 900px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.09) 0%, rgba(6, 182, 212, 0.02) 60%, transparent 100%);
+  filter: blur(120px);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.dark-theme .terminal-glow-bg {
+  opacity: 1;
+}
+
+.explorer-section {
+  position: relative;
+  overflow: visible;
+}
+.stack-glow-bg {
+  position: absolute;
+  top: 40%;
+  left: 10%;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, transparent 80%);
+  filter: blur(100px);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.dark-theme .stack-glow-bg {
+  opacity: 1;
+}
+
+.sandbox-section {
+  position: relative;
+  overflow: visible;
+}
+.sandbox-glow-left {
+  position: absolute;
+  bottom: 10%;
+  left: -100px;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.06) 0%, transparent 70%);
+  filter: blur(100px);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.sandbox-glow-right {
+  position: absolute;
+  top: 10%;
+  right: -100px;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.06) 0%, transparent 70%);
+  filter: blur(100px);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.dark-theme .sandbox-glow-left,
+.dark-theme .sandbox-glow-right {
+  opacity: 1;
+}

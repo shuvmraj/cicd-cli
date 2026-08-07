@@ -70,6 +70,8 @@ jobs:
 
   return (
     <section id="sandbox" className="sandbox-section">
+      <div className="sandbox-glow-left" />
+      <div className="sandbox-glow-right" />
       <motion.h2 
         className="section-title"
         initial={{ opacity: 0, y: 15 }}
