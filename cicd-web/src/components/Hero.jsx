@@ -126,7 +126,7 @@ export default function Hero({ theme }) {
           transition={{ duration: 0.6, delay: 0.2 }}
           style={{ textAlign: 'center', margin: '0 auto 40px', maxWidth: '720px' }}
         >
-          An extensible command-line utility built in Java 21 to audit security leaks, resolve topological dependency graphs, and compile optimized platform config workflows.
+          A high-performance command-line developer utility built in Java 21 that automatically scans your codebase repositories, detects frameworks, and generates production-ready, secure CI/CD pipelines instantly from your terminal.
         </motion.p>
 
         {/* Minimal Interactive Console Widget */}

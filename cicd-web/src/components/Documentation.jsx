@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Cpu, Terminal, BookOpen, Download, Settings, RefreshCw, CheckCircle } from 'lucide-react';
+import { Cpu, Terminal, BookOpen, Download, Settings, RefreshCw, CheckCircle, ShieldAlert, GitBranch } from 'lucide-react';
 
 const docTabs = {
   requirements: {
@@ -62,6 +62,75 @@ const docTabs = {
     title: "CLI Commands",
     icon: Terminal,
     content: <CommandReference />
+  },
+  audits: {
+    title: "Built-in Audits",
+    icon: ShieldAlert,
+    content: (
+      <div className="doc-detail-pane">
+        <h3 className="doc-detail-title">Shared Validation Rules</h3>
+        <p className="doc-detail-desc">The validator checks codebase pipelines against standard validation rules to prevent runtime failures and security risks:</p>
+        
+        <div className="requirements-list">
+          <div className="req-item">
+            <span className="req-label" style={{ color: 'var(--color-orange)' }}>Credential Safety Check</span>
+            <span className="req-val">Scans environment keys to ensure plaintext API secrets, auth header tokens, or SSL certificates are not declared directly in variables.</span>
+          </div>
+          <div className="req-item">
+            <span className="req-label" style={{ color: 'var(--color-orange)' }}>Topological Deadlock Auditor</span>
+            <span className="req-val">Traverses stage dependency paths to detect stage cycles (e.g. stage-1 depending on stage-2 while stage-2 references stage-1).</span>
+          </div>
+          <div className="req-item">
+            <span className="req-label" style={{ color: 'var(--color-orange)' }}>Artifact Alignment Auditor</span>
+            <span className="req-val">Ensures compiler artifacts (like `.jar` or `.zip` files) have corresponding packaging and archival target steps.</span>
+          </div>
+          <div className="req-item">
+            <span className="req-label" style={{ color: 'var(--color-orange)' }}>Build Command Consistency</span>
+            <span className="req-val">Cross-references commands to detect framework mismatches (e.g. alerts when trying to call node tasks inside a Maven codebase).</span>
+          </div>
+        </div>
+      </div>
+    )
+  },
+  architecture: {
+    title: "Workflow Flow",
+    icon: GitBranch,
+    content: (
+      <div className="doc-detail-pane">
+        <h3 className="doc-detail-title">Execution Lifecycle</h3>
+        <p className="doc-detail-desc">The internal flow diagram from codebase scanning to final translated configuration output files:</p>
+        
+        <div className="translation-grid" style={{ gridTemplateColumns: '1fr' }}>
+          <div className="trans-direction-card" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div className="trans-path" style={{ justifyContent: 'flex-start', gap: '12px' }}>
+              <span style={{ minWidth: '120px', color: 'var(--color-cyan)', fontWeight: 'bold' }}>1. Codebase Scan</span>
+              <span>➜</span>
+              <span style={{ color: 'var(--text-secondary)' }}>Scans file paths to find framework descriptors (pom.xml, package.json).</span>
+            </div>
+            <div className="trans-path" style={{ justifyContent: 'flex-start', gap: '12px' }}>
+              <span style={{ minWidth: '120px', color: 'var(--color-cyan)', fontWeight: 'bold' }}>2. Blueprint model</span>
+              <span>➜</span>
+              <span style={{ color: 'var(--text-secondary)' }}>Initializes project manifest containing system dependencies and settings.</span>
+            </div>
+            <div className="trans-path" style={{ justifyContent: 'flex-start', gap: '12px' }}>
+              <span style={{ minWidth: '120px', color: 'var(--color-cyan)', fontWeight: 'bold' }}>3. Compilation</span>
+              <span>➜</span>
+              <span style={{ color: 'var(--text-secondary)' }}>Renders YAML actions using Mustache templates tailored for target execution hosts.</span>
+            </div>
+            <div className="trans-path" style={{ justifyContent: 'flex-start', gap: '12px' }}>
+              <span style={{ minWidth: '120px', color: 'var(--color-cyan)', fontWeight: 'bold' }}>4. Static Audit</span>
+              <span>➜</span>
+              <span style={{ color: 'var(--text-secondary)' }}>Audits dependencies, verifies secrets, checks topological validity parameters.</span>
+            </div>
+            <div className="trans-path" style={{ justifyContent: 'flex-start', gap: '12px' }}>
+              <span style={{ minWidth: '120px', color: 'var(--color-cyan)', fontWeight: 'bold' }}>5. Explain / Convert</span>
+              <span>➜</span>
+              <span style={{ color: 'var(--text-secondary)' }}>Plots estimated stage duration timelines or translates configuration blocks.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   },
   translator: {
     title: "Workflow Translator",

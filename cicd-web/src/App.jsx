@@ -52,8 +52,8 @@ export default function App() {
       {/* Hero section with Headline and CLI Download widget */}
       <Hero theme={theme} />
 
-      {/* Tech features detail display */}
-      <Features theme={theme} />
+      {/* Detailed Documentation & Command Reference Directory */}
+      <Documentation theme={theme} />
 
       {/* Command playground terminal simulator */}
       <TerminalPlayground theme={theme} />
@@ -61,8 +61,8 @@ export default function App() {
       {/* Codebase Stack Explorer templates */}
       <StackExplorer theme={theme} />
 
-      {/* Detailed Documentation & Command Reference Directory */}
-      <Documentation theme={theme} />
+      {/* Tech features detail display */}
+      <Features theme={theme} />
 
       {/* Rule engine live audit sandbox */}
       <RuleSandbox theme={theme} />
