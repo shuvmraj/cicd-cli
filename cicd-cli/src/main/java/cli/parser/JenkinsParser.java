@@ -2,6 +2,7 @@ package cli.parser;
 
 import cli.model.ParsedPipeline;
 import cli.model.PipelineStage;
+import cli.model.PipelineStep;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,10 +29,20 @@ public class JenkinsParser implements PipelineParser {
             return pipeline;
         }
 
+        pipeline.setPlatform("jenkins");
+        pipeline.setName("Jenkins Pipeline");
+
         // 1. Image detection
         Matcher imageMatcher = AGENT_IMAGE_PATTERN.matcher(content);
         if (imageMatcher.find()) {
             pipeline.setDockerImage(imageMatcher.group(1));
+        } else if (content.matches("(?s).*\\bagent\\s+any\\b.*")) {
+            pipeline.setRunner("any");
+        }
+
+        Matcher labelMatcher = Pattern.compile("label\\s+['\"]([^'\"]+)['\"]").matcher(content);
+        if (labelMatcher.find()) {
+            pipeline.setRunner(labelMatcher.group(1));
         }
 
         // 2. Environment variables detection
@@ -54,6 +65,7 @@ public class JenkinsParser implements PipelineParser {
         // 4. Cache detection
         if (content.contains("cache") || content.contains("restoreSheets") || content.contains("stash")) {
             pipeline.setHasCache(true);
+            pipeline.addUnsupportedFeature("Jenkins cache/stash behavior");
         }
 
         // 5. Parse Stages
@@ -65,28 +77,33 @@ public class JenkinsParser implements PipelineParser {
             String stageBlock = extractBlock(content, stageContentIndex);
 
             PipelineStage stage = new PipelineStage(stageName);
+            stage.setId(stageName);
+            stage.setStageName(stageName);
 
             // Extract sh commands inside stage
             Matcher shSingle = SH_SINGLE_LINE_PATTERN.matcher(stageBlock);
             while (shSingle.find()) {
-                stage.addCommand(shSingle.group(1).trim());
+                stage.addStep(PipelineStep.run(shSingle.group(1)));
             }
 
             Matcher shTriple = SH_TRIPLE_QUOTE_PATTERN.matcher(stageBlock);
             while (shTriple.find()) {
-                for (String line : shTriple.group(1).split("\\r?\\n")) {
-                    if (!line.trim().isEmpty()) {
-                        stage.addCommand(line.trim());
-                    }
-                }
+                stage.addStep(PipelineStep.run(shTriple.group(1).strip()));
             }
 
+            if (stageBlock.contains("parallel") || stageBlock.contains("matrix")
+                    || stageBlock.contains("when") || stageBlock.contains("input")) {
+                pipeline.addUnsupportedFeature("Jenkins parallel/matrix/conditional stage behavior");
+            }
             pipeline.addStage(stage);
             searchStart = stageHeaderMatcher.end();
         }
 
         if (pipeline.getStages().isEmpty()) {
             pipeline.addWarning("No stage definitions found in Jenkinsfile");
+        }
+        if (content.contains("post {") || content.contains("post{")) {
+            pipeline.addUnsupportedFeature("Jenkins post actions");
         }
 
         return pipeline;

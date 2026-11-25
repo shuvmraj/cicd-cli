@@ -40,6 +40,9 @@ public class ValidateCommand implements Callable<Integer> {
     @Option(names = {"-d", "--dir"}, description = "Base directory of the codebase")
     private String baseDir = ".";
 
+    @Option(names = {"--platform"}, description = "Pipeline platform for files with non-standard names")
+    private String platform;
+
     @Override
     public Integer call() {
         if (pipelineFile == null && pipelineFileParam != null) {
@@ -70,11 +73,16 @@ public class ValidateCommand implements Callable<Integer> {
 
         try {
             String content = Files.readString(pipelinePath);
-            PipelineParser parser = ParserFactory.getParser(pipelinePath);
+            PipelineParser parser = platform == null
+                    ? ParserFactory.getParser(pipelinePath)
+                    : ParserFactory.getParser(platform);
             ParsedPipeline parsedPipeline = parser.parse(content);
 
             DetectorService detectorService = new DetectorService();
             ProjectModel projectModel = detectorService.detect(projectPath);
+            for (String warning : projectModel.getDetectionWarnings()) {
+                System.err.println(OutputFormatter.yellow("Detection warning: " + warning));
+            }
 
             ValidationEngine validationEngine = new ValidationEngine();
             ValidationReport report = validationEngine.validate(projectModel, parsedPipeline);
@@ -125,6 +133,9 @@ public class ValidateCommand implements Callable<Integer> {
         } catch (IOException e) {
             System.err.println(OutputFormatter.red("Failed to read pipeline file: " + e.getMessage()));
             return 1;
+        } catch (IllegalArgumentException e) {
+            System.err.println(OutputFormatter.red("Pipeline error: " + e.getMessage()));
+            return 2;
         }
     }
 
@@ -133,11 +144,15 @@ public class ValidateCommand implements Callable<Integer> {
         Path githubDir = root.resolve(".github").resolve("workflows");
         if (Files.exists(githubDir) && Files.isDirectory(githubDir)) {
             try (Stream<Path> files = Files.list(githubDir)) {
-                Path workflow = files.filter(f -> f.toString().endsWith(".yml") || f.toString().endsWith(".yaml"))
+                Path workflow = files.filter(Files::isRegularFile)
+                        .filter(f -> f.toString().endsWith(".yml") || f.toString().endsWith(".yaml"))
+                        .sorted()
                         .findFirst()
                         .orElse(null);
                 if (workflow != null) return workflow;
-            } catch (IOException ignored) {}
+            } catch (IOException e) {
+                System.err.println(OutputFormatter.red("Could not scan GitHub workflow directory: " + e.getMessage()));
+            }
         }
 
         // Check GitLab

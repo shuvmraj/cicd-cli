@@ -26,63 +26,52 @@ public class TestingStageRule implements Rule {
     public List<ValidationIssue> evaluate(ProjectModel project, ParsedPipeline pipeline) {
         List<ValidationIssue> issues = new ArrayList<>();
         String testFramework = project.getTestFramework();
-
-        // 1. Locate test stage
-        PipelineStage testStage = null;
-        for (PipelineStage stage : pipeline.getStages()) {
-            String name = stage.getName().toLowerCase();
-            if (name.contains("test") || name.contains("spec") || name.contains("verify") || name.contains("lint")) {
-                testStage = stage;
-                break;
-            }
-        }
-
-        if (testStage == null) {
-            if ("None".equals(testFramework)) {
-                issues.add(new ValidationIssue(
-                        Severity.INFO,
-                        "No test framework configured for static website; skipping test stage requirement.",
-                        getName()
-                ));
-            } else {
-                issues.add(new ValidationIssue(
-                        Severity.ERROR,
-                        "Testing stage is missing. A production-ready pipeline must run unit/integration tests.",
-                        getName()
-                ));
-            }
-            return issues;
-        }
-
-        // 2. Validate commands
-        if (testStage.getCommands().isEmpty()) {
+        if (testFramework == null || "none".equalsIgnoreCase(testFramework)) {
             issues.add(new ValidationIssue(
-                    Severity.ERROR,
-                    "Testing stage '" + testStage.getName() + "' is empty. Add execution commands.",
+                    Severity.INFO,
+                    "No test framework was detected; test-stage requirements were not evaluated.",
                     getName()
             ));
             return issues;
         }
 
-        // Check if commands match expected test executors
-        boolean hasTestCmd = false;
-        String expectedKeyword = getExpectedTestKeyword(testFramework);
-
-        if (expectedKeyword == null) {
-            return issues;
-        }
-
-        for (String cmd : testStage.getCommands()) {
-            if (cmd.toLowerCase().contains(expectedKeyword.toLowerCase()) || cmd.toLowerCase().contains("test")) {
-                hasTestCmd = true;
-                break;
+        List<PipelineStage> testStages = new ArrayList<>();
+        boolean hasTestCommand = false;
+        for (PipelineStage stage : pipeline.getStages()) {
+            String name = (stage.getName() + " " + stage.getStageName()).toLowerCase();
+            if (name.contains("test") || name.contains("spec") || name.contains("verify")) {
+                testStages.add(stage);
+            }
+            for (String command : stage.getCommands()) {
+                if (matchesTestCommand(testFramework, command)) {
+                    hasTestCommand = true;
+                }
             }
         }
 
-        if (!hasTestCmd) {
+        if (!testStages.isEmpty()) {
+            boolean emptyTestStage = testStages.stream().anyMatch(stage -> stage.getCommands().isEmpty());
+            if (emptyTestStage) {
+                issues.add(new ValidationIssue(
+                        Severity.WARNING,
+                        "A test/verify stage has no parsed shell commands; review action-based test steps manually.",
+                        getName()
+                ));
+            }
+        } else if (!hasTestCommand) {
+            issues.add(new ValidationIssue(
+                    Severity.ERROR,
+                    "No test stage or recognizable test command was found for " + testFramework + ".",
+                    getName()
+            ));
+            return issues;
+        }
+
+        if (!hasTestCommand) {
             issues.add(new ValidationIssue(
                     Severity.WARNING,
-                    "Testing stage is configured, but no execution command matches the project's test framework: " + testFramework + " (expected: '" + expectedKeyword + "').",
+                    "A test-like stage exists, but no command matching test framework '"
+                            + testFramework + "' was recognized.",
                     getName()
             ));
         }
@@ -90,17 +79,36 @@ public class TestingStageRule implements Rule {
         return issues;
     }
 
-    private String getExpectedTestKeyword(String testFramework) {
-        if (testFramework == null) return null;
+    private boolean matchesTestCommand(String testFramework, String command) {
+        String text = command.toLowerCase();
         switch (testFramework.toLowerCase()) {
-            case "junit": return "test"; // maven/gradle test
-            case "jest": return "test";
-            case "vitest": return "vitest";
-            case "karma/protractor": return "test";
-            case "pytest": return "pytest";
-            case "phpunit": return "phpunit";
-            case "xunit": return "test"; // dotnet test
-            default: return "test";
+            case "junit":
+                return (text.contains("mvn") || text.contains("gradle")) && containsWord(text, "test")
+                        || (text.contains("mvn") && containsWord(text, "verify"));
+            case "jest":
+                return text.contains("jest") || isPackageManagerTestCommand(text);
+            case "vitest":
+                return text.contains("vitest") || isPackageManagerTestCommand(text);
+            case "karma/protractor":
+                return text.contains("karma") || text.contains("protractor")
+                        || isPackageManagerTestCommand(text);
+            case "pytest":
+                return text.contains("pytest");
+            case "phpunit":
+                return text.contains("phpunit") || text.contains("composer test");
+            case "xunit":
+                return text.contains("dotnet test");
+            default:
+                return containsWord(text, "test");
         }
+    }
+
+    private boolean isPackageManagerTestCommand(String command) {
+        return (command.contains("npm ") || command.contains("yarn ")
+                || command.contains("pnpm ")) && containsWord(command, "test");
+    }
+
+    private boolean containsWord(String text, String word) {
+        return text.matches("(?s).*\\b" + word + "\\b.*");
     }
 }

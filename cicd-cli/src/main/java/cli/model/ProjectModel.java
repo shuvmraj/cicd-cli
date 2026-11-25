@@ -1,6 +1,8 @@
 package cli.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Normalized model representing a software project's technology stack.
@@ -18,6 +20,9 @@ public class ProjectModel {
     private String artifactType;
     private String packageManager;
     private String deploymentTarget;
+    private String customBuildCommand;
+    private String customTestCommand;
+    private List<String> detectionWarnings = new ArrayList<>();
 
     public ProjectModel() {}
 
@@ -31,6 +36,9 @@ public class ProjectModel {
         this.artifactType = builder.artifactType;
         this.packageManager = builder.packageManager;
         this.deploymentTarget = builder.deploymentTarget;
+        this.customBuildCommand = builder.customBuildCommand;
+        this.customTestCommand = builder.customTestCommand;
+        this.detectionWarnings = new ArrayList<>(builder.detectionWarnings);
     }
 
     public String getLanguage() {
@@ -105,6 +113,32 @@ public class ProjectModel {
         this.deploymentTarget = deploymentTarget;
     }
 
+    public String getCustomBuildCommand() {
+        return customBuildCommand;
+    }
+
+    public void setCustomBuildCommand(String customBuildCommand) {
+        this.customBuildCommand = customBuildCommand;
+    }
+
+    public String getCustomTestCommand() {
+        return customTestCommand;
+    }
+
+    public void setCustomTestCommand(String customTestCommand) {
+        this.customTestCommand = customTestCommand;
+    }
+
+    public List<String> getDetectionWarnings() {
+        return detectionWarnings;
+    }
+
+    public void addDetectionWarning(String warning) {
+        if (warning != null && !detectionWarnings.contains(warning)) {
+            detectionWarnings.add(warning);
+        }
+    }
+
     @Override
     public String toString() {
         return "ProjectModel{" +
@@ -130,6 +164,9 @@ public class ProjectModel {
         private String artifactType;
         private String packageManager;
         private String deploymentTarget;
+        private String customBuildCommand;
+        private String customTestCommand;
+        private List<String> detectionWarnings = new ArrayList<>();
 
         public Builder language(String language) {
             this.language = language;
@@ -173,6 +210,16 @@ public class ProjectModel {
 
         public Builder deploymentTarget(String deploymentTarget) {
             this.deploymentTarget = deploymentTarget;
+            return this;
+        }
+
+        public Builder customBuildCommand(String customBuildCommand) {
+            this.customBuildCommand = customBuildCommand;
+            return this;
+        }
+
+        public Builder customTestCommand(String customTestCommand) {
+            this.customTestCommand = customTestCommand;
             return this;
         }
 

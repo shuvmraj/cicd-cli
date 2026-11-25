@@ -16,7 +16,7 @@ public class DockerGenerator extends BaseGenerator {
             Map<String, Object> context = buildContext(project);
             return templateEngine.render(templatePath, context);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to generate Dockerfile: " + e.getMessage(), e);
+            throw new IllegalStateException("Failed to generate Dockerfile: " + e.getMessage(), e);
         }
     }
 

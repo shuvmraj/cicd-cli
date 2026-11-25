@@ -3,6 +3,7 @@ package cli.commands;
 import cli.utils.ShellUtils;
 import cli.utils.OutputFormatter;
 import picocli.CommandLine.Command;
+import java.util.concurrent.Callable;
 
 /**
  * Subcommand to check system dependencies and environment health.
@@ -11,16 +12,14 @@ import picocli.CommandLine.Command;
         name = "doctor",
         description = "Validates the local environment, verifying toolchain installations (Docker, Git, kubectl, helm, Node, Java)"
 )
-public class DoctorCommand implements Runnable {
+public class DoctorCommand implements Callable<Integer> {
 
     @Override
-    public void run() {
+    public Integer call() {
         System.out.println("\nChecking CLI Environment Health...\n");
 
-        boolean overallPass = true;
-
         // 1. Git Check
-        checkTool("Git", new String[]{"git", "--version"}, true);
+        boolean requiredToolsPass = checkTool("Git", new String[]{"git", "--version"}, true);
 
         // 2. Docker Check
         checkTool("Docker", new String[]{"docker", "--version"}, false);
@@ -38,9 +37,10 @@ public class DoctorCommand implements Runnable {
         checkTool("helm", new String[]{"helm", "version", "--template", "{{.Version}}"}, false);
 
         System.out.println("\nEnvironment scan complete.\n");
+        return requiredToolsPass ? 0 : 1;
     }
 
-    private void checkTool(String name, String[] cmd, boolean isCritical) {
+    private boolean checkTool(String name, String[] cmd, boolean isCritical) {
         String output = ShellUtils.execCommand(cmd);
         String label = String.format("%-10s", name);
 
@@ -50,6 +50,7 @@ public class DoctorCommand implements Runnable {
             System.out.println(OutputFormatter.cyan(label) + " " + 
                                String.format("%-45s", version) + " " + 
                                OutputFormatter.bgGreen(" PASS "));
+            return true;
         } else {
             if (isCritical) {
                 System.out.println(OutputFormatter.cyan(label) + " " + 
@@ -60,6 +61,7 @@ public class DoctorCommand implements Runnable {
                                    String.format("%-45s", "Not detected on PATH") + " " + 
                                    OutputFormatter.bgYellow(" WARNING "));
             }
+            return !isCritical;
         }
     }
 

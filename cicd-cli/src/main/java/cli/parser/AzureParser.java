@@ -2,6 +2,7 @@ package cli.parser;
 
 import cli.model.ParsedPipeline;
 import cli.model.PipelineStage;
+import cli.model.PipelineStep;
 import org.yaml.snakeyaml.Yaml;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -30,11 +31,15 @@ public class AzureParser implements PipelineParser {
                 return pipeline;
             }
 
+            YamlSourceLocations locations = new YamlSourceLocations(content);
+            pipeline.setPlatform("azure");
+            pipeline.setName(stringValue(root.get("name")));
+            addTriggerValues(pipeline, root.get("trigger"));
+
             // 1. Global Variables
             Object varsObj = root.get("variables");
             if (varsObj instanceof Map) {
-                Map<String, Object> varsMap = (Map<String, Object>) varsObj;
-                varsMap.forEach((k, v) -> pipeline.getEnvironment().put(k, String.valueOf(v)));
+                toStringMap((Map<?, ?>) varsObj).forEach(pipeline.getEnvironment()::put);
             } else if (varsObj instanceof List) {
                 List<?> varsList = (List<?>) varsObj;
                 for (Object item : varsList) {
@@ -49,14 +54,20 @@ public class AzureParser implements PipelineParser {
                 }
             }
 
-            // 2. Global Pool/Image
+            // 2. Global Pool and container image
             Object poolObj = root.get("pool");
             if (poolObj instanceof Map) {
                 Map<String, Object> poolMap = (Map<String, Object>) poolObj;
                 Object vmImage = poolMap.get("vmImage");
                 if (vmImage != null) {
-                    pipeline.setDockerImage(String.valueOf(vmImage));
+                    pipeline.setRunner(String.valueOf(vmImage));
                 }
+            } else if (poolObj instanceof String) {
+                pipeline.setRunner(String.valueOf(poolObj));
+            }
+            Object containerObj = root.get("container");
+            if (containerObj != null) {
+                pipeline.setDockerImage(readImage(containerObj));
             }
 
             // 3. Scan Secrets
@@ -75,28 +86,49 @@ public class AzureParser implements PipelineParser {
                 Object stagesObj = root.get("stages");
                 if (stagesObj instanceof List) {
                     List<?> stagesList = (List<?>) stagesObj;
-                    for (Object stageObj : stagesList) {
+                    for (int stageIndex = 0; stageIndex < stagesList.size(); stageIndex++) {
+                        Object stageObj = stagesList.get(stageIndex);
                         if (stageObj instanceof Map) {
                             Map<String, Object> stageMap = (Map<String, Object>) stageObj;
-                            String stageName = (String) stageMap.getOrDefault("stage", "Stage");
-                            PipelineStage pipelineStage = new PipelineStage(stageName);
-
-                            // Extract dependencies
-                            Object dependsOn = stageMap.get("dependsOn");
-                            addDependencies(pipelineStage, dependsOn);
+                            String stageName = stringValue(stageMap.getOrDefault("stage", "Stage"));
+                            List<String> stageDependencies = toStringList(stageMap.get("dependsOn"));
 
                             // Extract commands from nested jobs
                             Object jobsObj = stageMap.get("jobs");
                             if (jobsObj instanceof List) {
                                 List<?> jobsList = (List<?>) jobsObj;
-                                for (Object jobObj : jobsList) {
+                                for (int jobIndex = 0; jobIndex < jobsList.size(); jobIndex++) {
+                                    Object jobObj = jobsList.get(jobIndex);
                                     if (jobObj instanceof Map) {
                                         Map<String, Object> jobMap = (Map<String, Object>) jobObj;
-                                        extractSteps(pipelineStage, jobMap.get("steps"));
+                                        String jobId = stringValue(jobMap.getOrDefault("job",
+                                                jobMap.getOrDefault("deployment", "Job")));
+                                        PipelineStage pipelineJob = new PipelineStage(
+                                                stringValue(jobMap.getOrDefault("displayName", jobId)));
+                                        pipelineJob.setId(jobId);
+                                        pipelineJob.setStageName(stageName);
+                                        pipelineJob.setSourceLine(locations.lineForPath(
+                                                "stages", stageIndex, "jobs", jobIndex));
+                                        pipelineJob.setStageDependencies(stageDependencies);
+                                        addDependencies(pipelineJob, jobMap.get("dependsOn"));
+                                        pipelineJob.setCondition(stringValue(jobMap.get("condition")));
+                                        pipelineJob.setRunner(readPoolImage(jobMap.get("pool"), pipeline.getRunner()));
+                                        pipelineJob.setContainerImage(readImage(jobMap.get("container")));
+                                        Object jobVariables = jobMap.get("variables");
+                                        if (jobVariables instanceof Map) {
+                                            toStringMap((Map<?, ?>) jobVariables)
+                                                    .forEach(pipelineJob.getEnv()::put);
+                                        }
+                                        extractSteps(pipelineJob, jobMap.get("steps"));
+                                        if (jobMap.containsKey("deployment")) {
+                                            pipeline.addUnsupportedFeature("Azure deployment jobs");
+                                        }
+                                        pipeline.addStage(pipelineJob);
                                     }
                                 }
+                            } else {
+                                pipeline.addWarning("Azure stage '" + stageName + "' has no job list");
                             }
-                            pipeline.addStage(pipelineStage);
                         }
                     }
                 }
@@ -104,14 +136,25 @@ public class AzureParser implements PipelineParser {
                 Object jobsObj = root.get("jobs");
                 if (jobsObj instanceof List) {
                     List<?> jobsList = (List<?>) jobsObj;
-                    for (Object jobObj : jobsList) {
+                    for (int jobIndex = 0; jobIndex < jobsList.size(); jobIndex++) {
+                        Object jobObj = jobsList.get(jobIndex);
                         if (jobObj instanceof Map) {
                             Map<String, Object> jobMap = (Map<String, Object>) jobObj;
-                            String jobName = (String) jobMap.getOrDefault("job", "Job");
-                            PipelineStage pipelineStage = new PipelineStage(jobName);
+                            String jobName = stringValue(jobMap.getOrDefault("job", "Job"));
+                            PipelineStage pipelineStage = new PipelineStage(
+                                    stringValue(jobMap.getOrDefault("displayName", jobName)));
+                            pipelineStage.setId(jobName);
+                            pipelineStage.setSourceLine(locations.lineForPath("jobs", jobIndex));
+                            pipelineStage.setRunner(readPoolImage(jobMap.get("pool"), pipeline.getRunner()));
+                            pipelineStage.setContainerImage(readImage(jobMap.get("container")));
                             
                             Object dependsOn = jobMap.get("dependsOn");
                             addDependencies(pipelineStage, dependsOn);
+                            pipelineStage.setCondition(stringValue(jobMap.get("condition")));
+                            Object jobVariables = jobMap.get("variables");
+                            if (jobVariables instanceof Map) {
+                                toStringMap((Map<?, ?>) jobVariables).forEach(pipelineStage.getEnv()::put);
+                            }
                             
                             extractSteps(pipelineStage, jobMap.get("steps"));
                             pipeline.addStage(pipelineStage);
@@ -120,6 +163,7 @@ public class AzureParser implements PipelineParser {
                 }
             } else if (root.containsKey("steps")) {
                 PipelineStage pipelineStage = new PipelineStage("PipelineSteps");
+                pipelineStage.setId("PipelineSteps");
                 extractSteps(pipelineStage, root.get("steps"));
                 pipeline.addStage(pipelineStage);
             } else {
@@ -152,30 +196,106 @@ public class AzureParser implements PipelineParser {
                     Map<?, ?> stepMap = (Map<?, ?>) stepObj;
                     
                     // Azure steps can use script, bash, pwsh, powershell, checkout, task
-                    String script = (String) stepMap.get("script");
+                    PipelineStep step = new PipelineStep();
+                    step.setName(stringValue(stepMap.get("displayName")));
+                    Object stepEnv = stepMap.get("env");
+                    if (stepEnv instanceof Map) {
+                        step.setEnvironment(toStringMap((Map<?, ?>) stepEnv));
+                    }
+
+                    String script = stringValue(stepMap.get("script"));
                     if (script != null) {
-                        stage.addCommand(script.trim());
+                        step.setCommand(script);
+                        stage.addStep(step);
                         continue;
                     }
                     
-                    String bash = (String) stepMap.get("bash");
+                    String bash = stringValue(stepMap.get("bash"));
                     if (bash != null) {
-                        stage.addCommand(bash.trim());
+                        step.setCommand(bash);
+                        stage.addStep(step);
                         continue;
                     }
 
-                    String pwsh = (String) stepMap.get("pwsh");
+                    String pwsh = stringValue(stepMap.get("pwsh"));
                     if (pwsh != null) {
-                        stage.addCommand(pwsh.trim());
+                        step.setCommand(pwsh);
+                        stage.addStep(step);
                         continue;
                     }
 
-                    String task = (String) stepMap.get("task");
+                    String powershell = stringValue(stepMap.get("powershell"));
+                    if (powershell != null) {
+                        step.setCommand(powershell);
+                        stage.addStep(step);
+                        continue;
+                    }
+
+                    String task = stringValue(stepMap.get("task"));
                     if (task != null) {
-                        stage.addCommand("task: " + task);
+                        step.setUses("task: " + task);
+                        Object inputs = stepMap.get("inputs");
+                        if (inputs instanceof Map) {
+                            step.setInputs(toStringMap((Map<?, ?>) inputs));
+                        }
+                        stage.addStep(step);
+                    } else if (stepMap.containsKey("checkout")) {
+                        step.setUses("checkout: " + stepMap.get("checkout"));
+                        stage.addStep(step);
                     }
                 }
             }
         }
+    }
+
+    private void addTriggerValues(ParsedPipeline pipeline, Object value) {
+        pipeline.setTriggerConfiguration(value);
+        if (value instanceof Map) {
+            ((Map<?, ?>) value).keySet().forEach(key -> pipeline.addTrigger(String.valueOf(key)));
+        } else if (value instanceof List) {
+            ((List<?>) value).forEach(item -> pipeline.addTrigger(String.valueOf(item)));
+        } else if (value instanceof String) {
+            pipeline.addTrigger((String) value);
+        }
+    }
+
+    private String readImage(Object value) {
+        if (value instanceof Map) {
+            Object image = ((Map<?, ?>) value).get("image");
+            return image == null ? null : String.valueOf(image);
+        }
+        return value == null ? null : String.valueOf(value);
+    }
+
+    private String readPoolImage(Object pool, String fallback) {
+        if (pool instanceof Map) {
+            Object image = ((Map<?, ?>) pool).get("vmImage");
+            return image == null ? fallback : String.valueOf(image);
+        }
+        return pool == null ? fallback : String.valueOf(pool);
+    }
+
+    private List<String> toStringList(Object value) {
+        if (value instanceof List) {
+            List<String> result = new ArrayList<>();
+            for (Object item : (List<?>) value) {
+                result.add(String.valueOf(item));
+            }
+            return result;
+        }
+        if (value instanceof String) {
+            return new ArrayList<>(List.of((String) value));
+        }
+        return new ArrayList<>();
+    }
+
+    private Map<String, String> toStringMap(Map<?, ?> source) {
+        Map<String, String> result = new LinkedHashMap<>();
+        source.forEach((key, value) -> result.put(String.valueOf(key), String.valueOf(value)));
+        return result;
+    }
+
+    private String stringValue(Object value) {
+        return value == null ? null : String.valueOf(value);
     }
 }

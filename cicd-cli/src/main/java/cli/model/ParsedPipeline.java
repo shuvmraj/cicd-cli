@@ -1,7 +1,7 @@
 package cli.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,15 +9,37 @@ import java.util.Map;
  * Normalized model representing a parsed CI/CD pipeline.
  */
 public class ParsedPipeline {
+    private String platform;
+    private String name;
     private List<PipelineStage> stages = new ArrayList<>();
-    private Map<String, String> environment = new HashMap<>();
+    private Map<String, String> environment = new LinkedHashMap<>();
+    private List<String> triggers = new ArrayList<>();
+    private Object triggerConfiguration;
     private List<String> secrets = new ArrayList<>();
     private boolean hasCache;
     private String dockerImage;
+    private String runner;
     private List<String> errors = new ArrayList<>();
     private List<String> warnings = new ArrayList<>();
+    private List<String> unsupportedFeatures = new ArrayList<>();
 
     public ParsedPipeline() {}
+
+    public String getPlatform() {
+        return platform;
+    }
+
+    public void setPlatform(String platform) {
+        this.platform = platform;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public List<PipelineStage> getStages() {
         return stages;
@@ -39,7 +61,27 @@ public class ParsedPipeline {
     }
 
     public void setEnvironment(Map<String, String> environment) {
-        this.environment = environment;
+        this.environment = environment != null ? new LinkedHashMap<>(environment) : new LinkedHashMap<>();
+    }
+
+    public List<String> getTriggers() {
+        return triggers;
+    }
+
+    public void setTriggers(List<String> triggers) {
+        this.triggers = triggers != null ? new ArrayList<>(triggers) : new ArrayList<>();
+    }
+
+    public void addTrigger(String trigger) {
+        triggers.add(trigger);
+    }
+
+    public Object getTriggerConfiguration() {
+        return triggerConfiguration;
+    }
+
+    public void setTriggerConfiguration(Object triggerConfiguration) {
+        this.triggerConfiguration = triggerConfiguration;
     }
 
     public List<String> getSecrets() {
@@ -51,8 +93,8 @@ public class ParsedPipeline {
     }
 
     public void addSecret(String secret) {
-        if (this.secrets == null) {
-            this.secrets = new ArrayList<>();
+        if (secret != null && !secrets.contains(secret)) {
+            secrets.add(secret);
         }
         this.secrets.add(secret);
     }
@@ -71,6 +113,14 @@ public class ParsedPipeline {
 
     public void setDockerImage(String dockerImage) {
         this.dockerImage = dockerImage;
+    }
+
+    public String getRunner() {
+        return runner;
+    }
+
+    public void setRunner(String runner) {
+        this.runner = runner;
     }
 
     public List<String> getErrors() {
@@ -97,22 +147,33 @@ public class ParsedPipeline {
     }
 
     public void addWarning(String warning) {
-        if (this.warnings == null) {
-            this.warnings = new ArrayList<>();
+        warnings.add(warning);
+    }
+
+    public List<String> getUnsupportedFeatures() {
+        return unsupportedFeatures;
+    }
+
+    public void addUnsupportedFeature(String feature) {
+        if (feature != null && !unsupportedFeatures.contains(feature)) {
+            unsupportedFeatures.add(feature);
         }
-        this.warnings.add(warning);
     }
 
     @Override
     public String toString() {
         return "ParsedPipeline{" +
                 "stages=" + stages +
+                ", platform='" + platform + '\'' +
                 ", environment=" + environment +
+                ", triggers=" + triggers +
                 ", secrets=" + secrets +
                 ", hasCache=" + hasCache +
                 ", dockerImage='" + dockerImage + '\'' +
+                ", runner='" + runner + '\'' +
                 ", errors=" + errors +
                 ", warnings=" + warnings +
+                ", unsupportedFeatures=" + unsupportedFeatures +
                 '}';
     }
 }

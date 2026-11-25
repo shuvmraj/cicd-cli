@@ -14,7 +14,7 @@ public class GitHubGenerator extends BaseGenerator {
             Map<String, Object> context = buildContext(project);
             return templateEngine.render("/templates/github/actions-template.yml", context);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to generate GitHub Actions pipeline: " + e.getMessage(), e);
+            throw new IllegalStateException("Failed to generate GitHub Actions pipeline: " + e.getMessage(), e);
         }
     }
 }

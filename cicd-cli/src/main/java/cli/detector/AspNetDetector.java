@@ -23,7 +23,9 @@ public class AspNetDetector implements ProjectDetector {
                 model.setArtifactType("DIST");
                 return true;
             }
-        } catch (IOException ignored) {}
+        } catch (IOException e) {
+            model.addDetectionWarning("Could not scan project root for .NET project files: " + e.getMessage());
+        }
         return false;
     }
 }

@@ -49,6 +49,16 @@ public class ArtifactsRule implements Rule {
                     break;
                 }
             }
+            if (!artifactsArchived) {
+                for (var step : stage.getSteps()) {
+                    String action = step.getUses();
+                    if (action != null && (action.toLowerCase().contains("upload-artifact")
+                            || action.toLowerCase().contains("archive"))) {
+                        artifactsArchived = true;
+                        break;
+                    }
+                }
+            }
             if (artifactsArchived) break;
         }
 

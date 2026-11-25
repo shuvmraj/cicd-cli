@@ -45,6 +45,11 @@ public class SecretsRule implements Rule {
         for (PipelineStage stage : pipeline.getStages()) {
             validateEnvMap(stage.getEnv(), "Stage '" + stage.getName() + "' Env", issues);
 
+            for (var step : stage.getSteps()) {
+                validateEnvMap(step.getEnvironment(),
+                        "Step '" + (step.getName() == null ? stage.getName() : step.getName()) + "' Env", issues);
+            }
+
             for (String cmd : stage.getCommands()) {
                 Matcher matcher = ASSIGNMENT_PATTERN.matcher(cmd);
                 while (matcher.find()) {

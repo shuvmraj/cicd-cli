@@ -38,10 +38,10 @@ public abstract class BaseGenerator implements PipelineGenerator {
         context.put("DOCKER_IMAGE", getDockerImage(framework, buildTool));
 
         // 2. Resolve BUILD_COMMAND
-        context.put("BUILD_COMMAND", getBuildCommand(buildTool));
+        context.put("BUILD_COMMAND", getBuildCommand(project, buildTool));
 
         // 3. Resolve TEST_COMMAND
-        context.put("TEST_COMMAND", getTestCommand(testFramework, buildTool));
+        context.put("TEST_COMMAND", getTestCommand(project, testFramework, buildTool));
 
         // 4. Resolve DEPLOY_COMMAND
         context.put("DEPLOY_COMMAND", getDeployCommand(deploymentTarget));
@@ -78,7 +78,10 @@ public abstract class BaseGenerator implements PipelineGenerator {
         return "ubuntu:latest";
     }
 
-    private String getBuildCommand(String buildTool) {
+    private String getBuildCommand(ProjectModel project, String buildTool) {
+        if (project.getCustomBuildCommand() != null && !project.getCustomBuildCommand().isBlank()) {
+            return project.getCustomBuildCommand();
+        }
         if (buildTool == null) return "echo 'No build tool'";
         switch (buildTool.toLowerCase()) {
             case "maven": return "mvn clean package -DskipTests";
@@ -94,7 +97,10 @@ public abstract class BaseGenerator implements PipelineGenerator {
         }
     }
 
-    private String getTestCommand(String testFramework, String buildTool) {
+    private String getTestCommand(ProjectModel project, String testFramework, String buildTool) {
+        if (project.getCustomTestCommand() != null && !project.getCustomTestCommand().isBlank()) {
+            return project.getCustomTestCommand();
+        }
         if (testFramework == null || "none".equalsIgnoreCase(testFramework)) {
             return "echo 'No tests configured'";
         }

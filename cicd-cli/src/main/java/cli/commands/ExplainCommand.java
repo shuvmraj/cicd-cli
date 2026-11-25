@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Stream;
+import java.util.concurrent.Callable;
 
 /**
  * Subcommand to explain a pipeline's lifecycle, stages, runtime, and parallelism.
@@ -20,7 +21,7 @@ import java.util.stream.Stream;
         name = "explain",
         description = "Provides a structured explanation of a pipeline workflow, depicting stages flow and runtime estimations"
 )
-public class ExplainCommand implements Runnable {
+public class ExplainCommand implements Callable<Integer> {
 
     @Option(names = {"-f", "--file"}, description = "Path to the pipeline file")
     private String pipelineFile;
@@ -28,31 +29,35 @@ public class ExplainCommand implements Runnable {
     @Option(names = {"-d", "--dir"}, description = "Project directory (used for auto-detection)")
     private String baseDir = ".";
 
+    @Option(names = {"--platform"}, description = "Pipeline platform for files with non-standard names")
+    private String platform;
+
     @Override
-    public void run() {
+    public Integer call() {
         Path projectPath = Path.of(baseDir).toAbsolutePath().normalize();
-        Path pipelinePath = null;
-
-        if (pipelineFile != null) {
-            pipelinePath = Path.of(pipelineFile).toAbsolutePath().normalize();
-        } else {
-            pipelinePath = autoDetectPipeline(projectPath);
-        }
-
-        if (pipelinePath == null || !Files.exists(pipelinePath)) {
-            System.err.println(OutputFormatter.red("Error: No pipeline configuration file found to explain."));
-            return;
-        }
-
         try {
+            Path pipelinePath = pipelineFile != null
+                    ? Path.of(pipelineFile).toAbsolutePath().normalize()
+                    : autoDetectPipeline(projectPath);
+            if (pipelinePath == null || !Files.isRegularFile(pipelinePath)) {
+                System.err.println(OutputFormatter.red("Error: No pipeline configuration file found to explain."));
+                return 1;
+            }
             String content = Files.readString(pipelinePath);
-            PipelineParser parser = ParserFactory.getParser(pipelinePath);
+            PipelineParser parser = platform == null
+                    ? ParserFactory.getParser(pipelinePath)
+                    : ParserFactory.getParser(platform);
             ParsedPipeline pipeline = parser.parse(content);
+            if (!pipeline.getErrors().isEmpty()) {
+                pipeline.getErrors().forEach(error ->
+                        System.err.println(OutputFormatter.red("Parse error: " + error)));
+                return 1;
+            }
 
             List<PipelineStage> stages = pipeline.getStages();
             if (stages.isEmpty()) {
                 System.out.println(OutputFormatter.yellow("The pipeline has no defined stages."));
-                return;
+                return 0;
             }
 
             // Print flow diagram
@@ -67,17 +72,29 @@ public class ExplainCommand implements Runnable {
             int estimatedSeconds = estimateRuntime(stages);
             int minutes = (int) Math.ceil(estimatedSeconds / 60.0);
 
-            System.out.println("\n" + OutputFormatter.bold("Estimated Runtime"));
+            System.out.println("\n" + OutputFormatter.bold("Rough Heuristic Runtime Estimate (not measured)"));
             System.out.println(minutes + " min");
 
             // Calculate parallel jobs
-            int maxParallel = calculateParallelJobs(stages);
-            System.out.println("\n" + OutputFormatter.bold("Parallel Jobs"));
-            System.out.println(maxParallel);
+            Integer maxParallel = calculateParallelJobs(stages);
+            System.out.println("\n" + OutputFormatter.bold("Maximum Jobs at the Same Dependency Depth"));
+            if (maxParallel == null) {
+                System.out.println("Unavailable because the dependency graph contains a cycle.");
+            } else {
+                System.out.println(maxParallel + " (uses parsed job/stage dependencies; ignores runner capacity and platform limits)");
+            }
             System.out.println();
 
+            for (String warning : pipeline.getWarnings()) {
+                System.err.println(OutputFormatter.yellow("Warning: " + warning));
+            }
+            return 0;
+        } catch (IllegalArgumentException e) {
+            System.err.println(OutputFormatter.red("Pipeline error: " + e.getMessage()));
+            return 2;
         } catch (IOException e) {
             System.err.println(OutputFormatter.red("IO Error: Failed to read pipeline file: " + e.getMessage()));
+            return 1;
         }
     }
 
@@ -117,70 +134,79 @@ public class ExplainCommand implements Runnable {
         return total;
     }
 
-    private int calculateParallelJobs(List<PipelineStage> stages) {
-        // Build adjacency map of stage name -> dependencies
-        Map<String, List<String>> dependencies = new HashMap<>();
-        Map<String, Integer> levels = new HashMap<>();
-
+    private Integer calculateParallelJobs(List<PipelineStage> stages) {
+        Map<String, PipelineStage> jobs = new LinkedHashMap<>();
+        Map<String, List<String>> dependents = new LinkedHashMap<>();
+        Map<String, Integer> remainingDependencies = new LinkedHashMap<>();
+        Map<String, List<String>> jobsByStage = new LinkedHashMap<>();
         for (PipelineStage stage : stages) {
-            dependencies.put(stage.getName().toLowerCase(), stage.getDependencies());
+            String id = identifier(stage).toLowerCase(Locale.ROOT);
+            jobs.put(id, stage);
+            dependents.put(id, new ArrayList<>());
+            remainingDependencies.put(id, 0);
+            if (stage.getStageName() != null) {
+                jobsByStage.computeIfAbsent(stage.getStageName().toLowerCase(Locale.ROOT),
+                        ignored -> new ArrayList<>()).add(id);
+            }
         }
-
-        // Compute levels (longest path from a stage with 0 dependencies)
-        boolean changed = true;
-        int iterations = 0;
-        // Limit iterations to prevent infinite loop on cycles (cycles are checked in validation)
-        while (changed && iterations < stages.size()) {
-            changed = false;
-            iterations++;
-            for (PipelineStage stage : stages) {
-                String name = stage.getName().toLowerCase();
-                List<String> deps = dependencies.get(name);
-                int currentLevel = levels.getOrDefault(name, 0);
-                int maxDepLevel = -1;
-
-                for (String dep : deps) {
-                    Integer depLevel = levels.get(dep.toLowerCase());
-                    if (depLevel != null) {
-                        maxDepLevel = Math.max(maxDepLevel, depLevel);
-                    } else {
-                        // Dependency is not processed yet or doesn't exist
-                        maxDepLevel = Math.max(maxDepLevel, 0);
-                    }
-                }
-
-                int newLevel = maxDepLevel + 1;
-                if (newLevel != currentLevel) {
-                    levels.put(name, newLevel);
-                    changed = true;
+        for (Map.Entry<String, PipelineStage> entry : jobs.entrySet()) {
+            String id = entry.getKey();
+            Set<String> dependencyIds = new LinkedHashSet<>();
+            for (String dependency : entry.getValue().getDependencies()) {
+                String dependencyId = dependency.toLowerCase(Locale.ROOT);
+                dependencyIds.add(dependencyId);
+            }
+            for (String stageDependency : entry.getValue().getStageDependencies()) {
+                dependencyIds.addAll(jobsByStage.getOrDefault(
+                        stageDependency.toLowerCase(Locale.ROOT), Collections.emptyList()));
+            }
+            for (String dependencyId : dependencyIds) {
+                if (jobs.containsKey(dependencyId) && !dependencyId.equals(id)) {
+                    dependents.get(dependencyId).add(id);
+                    remainingDependencies.put(id, remainingDependencies.get(id) + 1);
                 }
             }
         }
 
-        // Count how many stages are in each level
-        Map<Integer, Integer> levelCounts = new HashMap<>();
-        for (int lv : levels.values()) {
-            levelCounts.put(lv, levelCounts.getOrDefault(lv, 0) + 1);
+        List<String> ready = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : remainingDependencies.entrySet()) {
+            if (entry.getValue() == 0) {
+                ready.add(entry.getKey());
+            }
         }
-
-        // Maximum count at any level represents max parallel jobs
-        int maxParallel = 1;
-        for (int count : levelCounts.values()) {
-            maxParallel = Math.max(maxParallel, count);
+        int visited = 0;
+        int maximumAtDepth = 0;
+        while (!ready.isEmpty()) {
+            maximumAtDepth = Math.max(maximumAtDepth, ready.size());
+            List<String> next = new ArrayList<>();
+            for (String finished : ready) {
+                visited++;
+                for (String dependent : dependents.get(finished)) {
+                    int remaining = remainingDependencies.get(dependent) - 1;
+                    remainingDependencies.put(dependent, remaining);
+                    if (remaining == 0) next.add(dependent);
+                }
+            }
+            ready = next;
         }
-
-        return maxParallel;
+        return visited == stages.size() ? maximumAtDepth : null;
     }
 
-    private Path autoDetectPipeline(Path root) {
+    private String identifier(PipelineStage stage) {
+        return stage.getId() == null || stage.getId().isBlank() ? stage.getName() : stage.getId();
+    }
+
+    private Path autoDetectPipeline(Path root) throws IOException {
         Path githubDir = root.resolve(".github").resolve("workflows");
         if (Files.exists(githubDir) && Files.isDirectory(githubDir)) {
             try (Stream<Path> files = Files.list(githubDir)) {
-                Path workflow = files.filter(f -> f.toString().endsWith(".yml") || f.toString().endsWith(".yaml"))
+                Path workflow = files.filter(Files::isRegularFile)
+                        .filter(f -> f.toString().endsWith(".yml") || f.toString().endsWith(".yaml"))
+                        .sorted()
                         .findFirst()
                         .orElse(null);
                 if (workflow != null) return workflow;
-            } catch (IOException ignored) {}
+            }
         }
         Path gitlab = root.resolve(".gitlab-ci.yml");
         if (Files.exists(gitlab)) return gitlab;

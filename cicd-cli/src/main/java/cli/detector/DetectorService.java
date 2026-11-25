@@ -1,6 +1,7 @@
 package cli.detector;
 
 import cli.model.ProjectModel;
+import cli.utils.ProjectConfigService;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -38,6 +39,9 @@ public class DetectorService {
      * Scans the project directory and returns a populated ProjectModel.
      */
     public ProjectModel detect(Path projectDir) {
+        if (projectDir == null || !Files.isDirectory(projectDir)) {
+            throw new IllegalArgumentException("Project path is not a directory: " + projectDir);
+        }
         ProjectModel model = new ProjectModel();
 
         // 1. Detect Framework & Language
@@ -75,12 +79,22 @@ public class DetectorService {
                                 String content = Files.readString(p);
                                 return content.contains("apiVersion:") && (content.contains("Deployment") || content.contains("Service"));
                             } catch (IOException e) {
+                                    model.addDetectionWarning("Could not inspect possible Kubernetes manifest '"
+                                            + p.getFileName() + "': " + e.getMessage());
                                 return false;
                             }
                         });
-            } catch (IOException ignored) {}
+            } catch (IOException e) {
+                model.addDetectionWarning("Could not scan project root for Kubernetes manifests: " + e.getMessage());
+            }
         }
         model.setKubernetesEnabled(k8sEnabled);
+
+        try {
+            new ProjectConfigService().apply(projectDir, model);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Could not load project configuration: " + e.getMessage(), e);
+        }
 
         // 3. Resolve Deployment Target
         if (k8sEnabled) {

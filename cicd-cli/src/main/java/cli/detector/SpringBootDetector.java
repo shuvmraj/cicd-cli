@@ -13,6 +13,7 @@ public class SpringBootDetector implements ProjectDetector {
     public boolean detect(Path projectDir, ProjectModel model) {
         Path pomXml = projectDir.resolve("pom.xml");
         Path gradleBuild = projectDir.resolve("build.gradle");
+        Path gradleKtsBuild = projectDir.resolve("build.gradle.kts");
 
         if (Files.exists(pomXml)) {
             try {
@@ -26,12 +27,15 @@ public class SpringBootDetector implements ProjectDetector {
                     model.setArtifactType("JAR");
                     return true;
                 }
-            } catch (IOException ignored) {}
+            } catch (IOException e) {
+                model.addDetectionWarning("Could not read pom.xml: " + e.getMessage());
+            }
         }
 
-        if (Files.exists(gradleBuild)) {
+        for (Path gradleFile : new Path[]{gradleBuild, gradleKtsBuild}) {
+          if (Files.exists(gradleFile)) {
             try {
-                String content = Files.readString(gradleBuild);
+                String content = Files.readString(gradleFile);
                 if (content.contains("spring-boot") || content.contains("org.springframework.boot")) {
                     model.setLanguage("Java");
                     model.setFramework("Spring Boot");
@@ -41,7 +45,10 @@ public class SpringBootDetector implements ProjectDetector {
                     model.setArtifactType("JAR");
                     return true;
                 }
-            } catch (IOException ignored) {}
+            } catch (IOException e) {
+                model.addDetectionWarning("Could not read " + gradleFile.getFileName() + ": " + e.getMessage());
+            }
+          }
         }
 
         return false;

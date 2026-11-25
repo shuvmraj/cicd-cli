@@ -170,11 +170,21 @@ graph LR
 The application supports the following commands:
 
 ### `cicd init`
-Initializes a new `.cicd-config.json` configuration file with metadata in the target directory.
+Initializes a `.cicd-config.json` file. Detection and generation use the optional overrides and custom build/test commands from this file.
 ```bash
 $ cicd init
 Initialized successfully!
 Config created at: /path/to/project/.cicd-config.json
+```
+
+Supported configuration fields:
+```json
+{
+  "overrideLanguage": null,
+  "overrideFramework": null,
+  "customBuildCommand": null,
+  "customTestCommand": null
+}
 ```
 
 ### `cicd detect`
@@ -196,9 +206,11 @@ Done.
 ```
 
 ### `cicd validate`
-Validates a pipeline configuration file against codebase requirements.
+Validates a pipeline configuration file against detected codebase requirements. For a non-standard YAML filename, specify its platform explicitly.
 ```bash
 $ cicd validate -f .github/workflows/main.yml
+# or
+$ cicd validate --platform gitlab -f pipeline.yml
 Validating pipeline file: /path/to/main.yml...
 
 Validation Report
@@ -215,14 +227,14 @@ Overall Status: PASSED
 ```
 
 ### `cicd generate <platform>`
-Generates a highly-optimized, secure pipeline for a target environment (`github`, `gitlab`, `jenkins`, `azure`).
+Generates a starter pipeline for a target platform (`github`, `gitlab`, `jenkins`, `azure`). Review generated commands, secrets, registry settings, and deployment configuration before using it in production.
 ```bash
 $ cicd generate github -d . -w
 Success: Pipeline generated and saved to: .github/workflows/main.yml
 ```
 
 ### `cicd explain`
-Provides a step-by-step description of the execution flow, estimated runtime, and concurrency.
+Shows the parsed execution flow, a rough heuristic runtime estimate, and dependency-depth concurrency. Runtime is not measured from prior pipeline runs.
 ```bash
 $ cicd explain -f .github/workflows/main.yml
 Pipeline
@@ -243,12 +255,13 @@ Parallel Jobs
 ```
 
 ### `cicd convert <source> <target> [file]`
-Translates a pipeline from a source platform configuration format to another.
+Converts supported pipeline structure and commands between platforms. Unsupported or platform-specific behavior is reported as a conversion warning and must be reviewed.
 ```bash
 $ cicd convert github gitlab -f .github/workflows/main.yml -o .gitlab-ci.yml
 Converting github (main.yml) to gitlab...
 Success: Pipeline translated and saved to: .gitlab-ci.yml
 ```
+When auto-detecting the source file, `--dir` selects the project directory. Use `--file` to choose a specific workflow.
 
 ### `cicd doctor`
 Checks system tools and environment dependencies.
@@ -288,4 +301,4 @@ This produces `target/cicd-cli-1.0-SNAPSHOT.jar` containing all bundled dependen
 ```bash
 mvn test
 ```
-The test suite consists of 15 fully automated unit and integration tests checking parsers, builders, templates, and tech stack detection.
+The test suite includes parser, conversion, rule, detector/configuration, template, and CLI exit-code regression tests.

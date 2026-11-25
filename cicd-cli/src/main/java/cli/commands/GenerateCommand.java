@@ -11,6 +11,7 @@ import picocli.CommandLine.Parameters;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.Callable;
 
 /**
  * Subcommand to generate CI/CD pipelines.
@@ -19,7 +20,7 @@ import java.nio.file.Path;
         name = "generate",
         description = "Generates a fully optimized pipeline configuration file based on codebase technology stack"
 )
-public class GenerateCommand implements Runnable {
+public class GenerateCommand implements Callable<Integer> {
 
     @Parameters(index = "0", description = "Target platform: github, gitlab, jenkins, azure")
     private String platform;
@@ -34,18 +35,21 @@ public class GenerateCommand implements Runnable {
     private boolean writeToStandardLocation = false;
 
     @Override
-    public void run() {
+    public Integer call() {
         Path projectPath = Path.of(baseDir).toAbsolutePath().normalize();
         
-        if (!Files.exists(projectPath)) {
+        if (!Files.isDirectory(projectPath)) {
             System.err.println(OutputFormatter.red("Error: Project directory does not exist: " + baseDir));
-            return;
+            return 1;
         }
 
         try {
             // 1. Detect Stack
             DetectorService detectorService = new DetectorService();
             ProjectModel model = detectorService.detect(projectPath);
+            for (String warning : model.getDetectionWarnings()) {
+                System.err.println(OutputFormatter.yellow("Detection warning: " + warning));
+            }
 
             // 2. Generate Pipeline
             PipelineGenerator generator = PipelineGeneratorFactory.getGenerator(platform);
@@ -67,17 +71,24 @@ public class GenerateCommand implements Runnable {
                 }
                 Files.writeString(destPath, renderedPipeline);
                 System.out.println("\n" + OutputFormatter.green("Success: ") + "Pipeline generated and saved to: " + OutputFormatter.bold(destPath.toString()) + "\n");
+                return 0;
             } else {
                 // Output to stdout
                 System.out.println("\n" + OutputFormatter.bold("Generated " + platform + " Pipeline:") + "\n");
                 System.out.println(renderedPipeline);
                 System.out.println();
+                return 0;
             }
 
         } catch (IllegalArgumentException e) {
             System.err.println(OutputFormatter.red("Error: " + e.getMessage()));
+            return 2;
+        } catch (IllegalStateException e) {
+            System.err.println(OutputFormatter.red("Generation error: " + e.getMessage()));
+            return 1;
         } catch (IOException e) {
             System.err.println(OutputFormatter.red("IO Error: Failed to write output: " + e.getMessage()));
+            return 1;
         }
     }
 

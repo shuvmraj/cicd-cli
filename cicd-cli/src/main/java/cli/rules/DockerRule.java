@@ -35,8 +35,12 @@ public class DockerRule implements Rule {
         boolean dockerStageExists = false;
         PipelineStage dockerStage = null;
         for (PipelineStage stage : pipeline.getStages()) {
-            String name = stage.getName().toLowerCase();
-            if (name.contains("docker") || name.contains("image") || name.contains("container") || name.contains("registry")) {
+            String name = (stage.getName() + " " + stage.getStageName()).toLowerCase();
+            boolean usesDockerAction = stage.getSteps().stream()
+                    .anyMatch(step -> step.getUses() != null
+                            && step.getUses().toLowerCase().contains("docker/build-push-action"));
+            if (name.contains("docker") || name.contains("image") || name.contains("container")
+                    || name.contains("registry") || usesDockerAction) {
                 dockerStageExists = true;
                 dockerStage = stage;
                 break;
@@ -64,14 +68,16 @@ public class DockerRule implements Rule {
             boolean hasDockerPush = false;
             boolean usesCacheOption = false;
 
-            for (String cmd : dockerStage.getCommands()) {
-                if (cmd.contains("docker build") || cmd.contains("build-push-action") || cmd.contains("kaniko")) {
+            for (PipelineStage stage : pipeline.getStages()) {
+              for (String cmd : stage.getCommands()) {
+                String normalized = cmd.toLowerCase();
+                if (normalized.contains("docker build") || normalized.contains("build-push-action") || normalized.contains("kaniko")) {
                     hasDockerBuild = true;
                 }
-                if (cmd.contains("docker push") || cmd.contains("build-push-action") || cmd.contains("kaniko")) {
+                if (normalized.contains("docker push") || normalized.contains("build-push-action") || normalized.contains("kaniko")) {
                     hasDockerPush = true;
                 }
-                if (cmd.contains("--cache-from") || cmd.contains("cache-to") || cmd.contains("cache=true")) {
+                if (normalized.contains("--cache-from") || normalized.contains("cache-to") || normalized.contains("cache=true")) {
                     usesCacheOption = true;
                 }
 
@@ -90,6 +96,14 @@ public class DockerRule implements Rule {
                             ));
                         }
                     }
+                  }
+                  for (var step : stage.getSteps()) {
+                    String reference = step.getUses();
+                    if (reference != null && reference.toLowerCase().contains("docker/build-push-action")) {
+                        hasDockerBuild = true;
+                        hasDockerPush = true;
+                    }
+                  }
                 }
             }
 

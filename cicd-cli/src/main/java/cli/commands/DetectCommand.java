@@ -7,6 +7,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.Callable;
 
 /**
  * Subcommand to scan a codebase and output its ProjectModel details.
@@ -15,24 +16,30 @@ import java.nio.file.Path;
         name = "detect",
         description = "Scans project directories to identify language, frameworks, and deployment setups"
 )
-public class DetectCommand implements Runnable {
+public class DetectCommand implements Callable<Integer> {
 
     @Option(names = {"-d", "--dir"}, description = "Target directory to scan")
     private String targetDir = ".";
 
     @Override
-    public void run() {
+    public Integer call() {
         Path path = Path.of(targetDir).toAbsolutePath().normalize();
         
         System.out.println("\nScanning project at " + OutputFormatter.bold(path.toString()) + "...\n");
 
-        if (!Files.exists(path)) {
+        if (!Files.isDirectory(path)) {
             System.err.println(OutputFormatter.red("Error: Target directory does not exist."));
-            return;
+            return 1;
         }
 
-        DetectorService detectorService = new DetectorService();
-        ProjectModel model = detectorService.detect(path);
+        ProjectModel model;
+        try {
+            DetectorService detectorService = new DetectorService();
+            model = detectorService.detect(path);
+        } catch (IllegalArgumentException e) {
+            System.err.println(OutputFormatter.red("Error: " + e.getMessage()));
+            return 1;
+        }
 
         // Recommend platform based on existing files or fallback
         String recommendedPlatform = "GitHub Actions (recommended)";
@@ -55,7 +62,11 @@ public class DetectCommand implements Runnable {
         System.out.println(OutputFormatter.cyan("Kubernetes: ") + (model.isKubernetesEnabled() ? OutputFormatter.green("Found") : OutputFormatter.yellow("Not Found")));
         System.out.println(OutputFormatter.cyan("Deployment Target: ") + model.getDeploymentTarget());
         System.out.println(OutputFormatter.cyan("CI Platform: ") + recommendedPlatform);
+        for (String warning : model.getDetectionWarnings()) {
+            System.out.println(OutputFormatter.yellow("Warning: ") + warning);
+        }
 
         System.out.println("\n" + OutputFormatter.green("Done.") + "\n");
+        return 0;
     }
 }

@@ -28,12 +28,13 @@ public class BuildStageRule implements Rule {
         String framework = project.getFramework();
         String buildTool = project.getBuildTool();
 
-        boolean needsBuild = !"HTML/CSS/JavaScript".equals(framework) && !"None".equals(buildTool);
+        boolean needsBuild = !"HTML/CSS/JavaScript".equals(framework)
+                && buildTool != null && !"None".equalsIgnoreCase(buildTool);
 
         // Find stage matching "build" or "compile"
         PipelineStage buildStage = null;
         for (PipelineStage stage : pipeline.getStages()) {
-            String name = stage.getName().toLowerCase();
+            String name = (stage.getName() + " " + stage.getStageName()).toLowerCase();
             if (name.contains("build") || name.contains("compile") || name.contains("package") || name.contains("publish")) {
                 buildStage = stage;
                 break;

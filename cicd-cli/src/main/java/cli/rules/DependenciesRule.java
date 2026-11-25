@@ -28,13 +28,16 @@ public class DependenciesRule implements Rule {
 
         // Map of stage name to its dependencies
         Map<String, List<String>> adjList = new HashMap<>();
+        Map<String, String> displayNames = new HashMap<>();
         for (PipelineStage stage : stages) {
-            String name = stage.getName().trim();
+            String name = identifier(stage).trim();
+            String key = name.toLowerCase(Locale.ROOT);
             List<String> deps = new ArrayList<>();
             for (String dep : stage.getDependencies()) {
-                deps.add(dep.trim());
+                deps.add(dep.trim().toLowerCase(Locale.ROOT));
             }
-            adjList.put(name, deps);
+            adjList.put(key, deps);
+            displayNames.put(key, stage.getName());
         }
 
         // Check for cycles using DFS
@@ -50,10 +53,15 @@ public class DependenciesRule implements Rule {
                 if (hasCycleDFS(node, adjList, state, cyclePath)) {
                     // format cycle description
                     Collections.reverse(cyclePath);
-                    String cycleStr = String.join(" -> ", cyclePath);
+                    List<String> displayCycle = new ArrayList<>();
+                            for (String item : cyclePath) {
+                                displayCycle.add(displayNames.getOrDefault(item.toLowerCase(Locale.ROOT), item));
+                            }
+                            String cycleStr = String.join(" -> ", displayCycle);
                     issues.add(new ValidationIssue(
                             Severity.ERROR,
-                            "Circular dependency detected in stages execution path: " + cycleStr + " -> " + node,
+                            "Circular dependency detected in jobs execution path: " + cycleStr + " -> "
+                                    + displayNames.getOrDefault(node.toLowerCase(Locale.ROOT), node),
                             getName()
                     ));
                     // Stop after finding first cycle to prevent spamming
@@ -67,7 +75,7 @@ public class DependenciesRule implements Rule {
             for (String dep : stage.getDependencies()) {
                 boolean found = false;
                 for (PipelineStage s : stages) {
-                    if (s.getName().trim().equalsIgnoreCase(dep.trim())) {
+                    if (identifier(s).trim().equalsIgnoreCase(dep.trim())) {
                         found = true;
                         break;
                     }
@@ -83,6 +91,10 @@ public class DependenciesRule implements Rule {
         }
 
         return issues;
+    }
+
+    private String identifier(PipelineStage stage) {
+        return stage.getId() == null || stage.getId().isBlank() ? stage.getName() : stage.getId();
     }
 
     private boolean hasCycleDFS(String curr, Map<String, List<String>> adjList, Map<String, Integer> state, List<String> path) {

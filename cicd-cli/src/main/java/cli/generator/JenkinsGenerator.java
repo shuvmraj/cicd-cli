@@ -14,7 +14,7 @@ public class JenkinsGenerator extends BaseGenerator {
             Map<String, Object> context = buildContext(project);
             return templateEngine.render("/templates/jenkins/Jenkinsfile.template", context);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to generate Jenkinsfile: " + e.getMessage(), e);
+            throw new IllegalStateException("Failed to generate Jenkinsfile: " + e.getMessage(), e);
         }
     }
 }

@@ -14,7 +14,7 @@ public class GitLabGenerator extends BaseGenerator {
             Map<String, Object> context = buildContext(project);
             return templateEngine.render("/templates/gitlab/ci-template.yml", context);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to generate GitLab CI pipeline: " + e.getMessage(), e);
+            throw new IllegalStateException("Failed to generate GitLab CI pipeline: " + e.getMessage(), e);
         }
     }
 }

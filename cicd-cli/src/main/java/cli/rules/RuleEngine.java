@@ -44,11 +44,11 @@ public class RuleEngine {
         // 2. Structural Checks: Duplicate stages
         Set<String> stageNames = new HashSet<>();
         for (PipelineStage stage : pipeline.getStages()) {
-            String name = stage.getName().trim().toLowerCase();
+            String name = stageIdentifier(stage).trim().toLowerCase();
             if (stageNames.contains(name)) {
                 issues.add(new ValidationIssue(
                         Severity.ERROR,
-                        "Duplicate stage name detected: '" + stage.getName() + "'. Each stage must have a unique identifier.",
+                        "Duplicate job identifier detected: '" + stageIdentifier(stage) + "'. Each job must have a unique identifier.",
                         "StructureRule"
                 ));
             } else {
@@ -82,5 +82,9 @@ public class RuleEngine {
         }
 
         return issues;
+    }
+
+    private String stageIdentifier(PipelineStage stage) {
+        return stage.getId() == null || stage.getId().isBlank() ? stage.getName() : stage.getId();
     }
 }

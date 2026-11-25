@@ -96,4 +96,39 @@ public class RuleEngineTest {
                 .anyMatch(issue -> issue.getSeverity() == Severity.ERROR && issue.getMessage().contains("Invalid Docker image naming format"));
         assertTrue(hasError);
     }
+
+    @Test
+    public void lintStageDoesNotSatisfyTestRequirement() {
+        ProjectModel project = new ProjectModel.Builder()
+                .framework("React")
+                .buildTool("npm")
+                .testFramework("Jest")
+                .build();
+        ParsedPipeline pipeline = new ParsedPipeline();
+        PipelineStage lint = new PipelineStage("quality");
+        lint.setStageName("lint");
+        lint.addCommand("npm run lint");
+        pipeline.addStage(lint);
+
+        List<ValidationIssue> issues = new TestingStageRule().evaluate(project, pipeline);
+
+        assertTrue(issues.stream().anyMatch(issue -> issue.getSeverity() == Severity.ERROR
+                && issue.getMessage().contains("No test stage")));
+    }
+
+    @Test
+    public void dependenciesUseJobIdentifiersRatherThanDisplayNames() {
+        ParsedPipeline pipeline = new ParsedPipeline();
+        PipelineStage build = new PipelineStage("Compile Application");
+        build.setId("build");
+        pipeline.addStage(build);
+        PipelineStage test = new PipelineStage("Run Unit Tests");
+        test.setId("test");
+        test.addDependency("build");
+        pipeline.addStage(test);
+
+        List<ValidationIssue> issues = new DependenciesRule().evaluate(new ProjectModel(), pipeline);
+
+        assertTrue(issues.isEmpty());
+    }
 }

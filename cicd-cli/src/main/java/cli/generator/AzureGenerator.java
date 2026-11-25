@@ -14,7 +14,7 @@ public class AzureGenerator extends BaseGenerator {
             Map<String, Object> context = buildContext(project);
             return templateEngine.render("/templates/azure/azure-pipelines-template.yml", context);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to generate Azure DevOps pipeline: " + e.getMessage(), e);
+            throw new IllegalStateException("Failed to generate Azure DevOps pipeline: " + e.getMessage(), e);
         }
     }
 }
